@@ -1,0 +1,11 @@
+services:
+  frontend:
+    platform: linux/amd64
+    image: softvence/cheesuschrusty-frontend:latest
+    container_name: cheesuschrusty-frontend
+    environment:
+      - VITE_API_ENDPOINT=https://api.prontocorso.com
+      - VITE_AI_API_ENDPOINT=https://ai.prontocorso.com
+    ports:
+      - "4173:4173"
+    restart: always

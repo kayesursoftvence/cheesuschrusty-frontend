@@ -1,0 +1,1090 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ProntoCorso Developer Handoff: Multi-Language Architecture</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --border: #e2e8f0;
+      --text: #1e293b;
+      --text-secondary: #64748b;
+      --accent: #3b82f6;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --code-bg: #0f172a;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); line-height: 1.7; padding: 40px; }
+    .container { max-width: 1200px; margin: 0 auto; }
+    h1 { font-size: 32px; font-weight: 700; margin-bottom: 8px; }
+    h2 { font-size: 24px; font-weight: 700; margin: 48px 0 16px; padding-bottom: 8px; border-bottom: 2px solid var(--accent); }
+    .subtitle { color: var(--text-secondary); font-size: 16px; margin-bottom: 32px; }
+    .section { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 28px; margin-bottom: 24px; }
+    .section-title { font-size: 20px; font-weight: 700; margin-bottom: 16px; }
+    code { font-family: 'JetBrains Mono', monospace; background: #f1f5f9; padding: 2px 6px; border-radius: 4px; font-size: 13px; }
+    pre { font-family: 'JetBrains Mono', monospace; background: var(--code-bg); color: #e2e8f0; padding: 24px; border-radius: 8px; overflow-x: auto; font-size: 12px; line-height: 1.7; margin: 16px 0; white-space: pre-wrap; }
+    .prompt-block { font-family: 'JetBrains Mono', monospace; background: var(--code-bg); color: #e2e8f0; padding: 24px; border-radius: 8px; overflow-x: auto; font-size: 11px; line-height: 1.6; margin: 16px 0; white-space: pre-wrap; }
+    .var { color: #22d3ee; }
+    .comment { color: #64748b; }
+    .section-header { color: #a78bfa; font-weight: 600; }
+    .keyword { color: #f472b6; }
+    table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 14px; }
+    th, td { padding: 12px 16px; text-align: left; border-bottom: 1px solid var(--border); }
+    th { background: #f1f5f9; font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; }
+    .badge { display: inline-block; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+    .badge-success { background: #dcfce7; color: #166534; }
+    .badge-warning { background: #fef3c7; color: #92400e; }
+    .badge-danger { background: #fee2e2; color: #991b1b; }
+    .badge-info { background: #dbeafe; color: #1e40af; }
+    .callout { border-radius: 8px; padding: 16px; margin: 16px 0; }
+    .callout-info { background: linear-gradient(135deg, #dbeafe 0%, #e0f2fe 100%); border: 1px solid #93c5fd; }
+    .callout-info h4 { color: #1e40af; font-size: 14px; font-weight: 600; margin-bottom: 8px; }
+    .callout-info p { color: #1e3a8a; font-size: 13px; }
+    .callout-warning { background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border: 1px solid #fbbf24; }
+    .callout-warning h4 { color: #92400e; font-size: 14px; font-weight: 600; margin-bottom: 8px; }
+    .callout-warning p { color: #78350f; font-size: 13px; }
+    .callout-success { background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%); border: 1px solid #86efac; }
+    .callout-success h4 { color: #166534; font-size: 14px; font-weight: 600; margin-bottom: 8px; }
+    .callout-success p { color: #14532d; font-size: 13px; }
+    ul, ol { padding-left: 20px; }
+    li { margin-bottom: 8px; font-size: 14px; }
+    h3 { font-size: 16px; font-weight: 600; margin: 24px 0 12px; }
+    .toc { background: #f8fafc; border: 1px solid var(--border); border-radius: 8px; padding: 20px; margin-bottom: 32px; }
+    .toc h3 { margin-top: 0; }
+    .toc ol { margin: 0; }
+    .toc a { color: var(--accent); text-decoration: none; }
+    .toc a:hover { text-decoration: underline; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .divider { height: 2px; background: linear-gradient(to right, var(--accent), transparent); margin: 32px 0; }
+    .ui-mockup { background: #1e293b; border-radius: 8px; padding: 20px; color: #e2e8f0; font-size: 13px; margin: 16px 0; }
+    .ui-mockup-title { color: #94a3b8; font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 12px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>ProntoCorso Developer Handoff</h1>
+    <p class="subtitle">Multi-Language Architecture, Onboarding Flow, Admin Controls, and AI Prompts — January 21, 2026</p>
+
+    <div class="callout callout-info">
+      <h4>What This Document Covers</h4>
+      <p>This document provides the complete architecture for supporting multiple languages and CEFR levels. The system is designed so that <strong>all configuration is database-driven</strong>. Once built, new languages and levels can be activated without code changes — just database updates via the Admin UI.</p>
+    </div>
+
+    <div class="toc">
+      <h3>Contents</h3>
+      <ol>
+        <li><a href="#architecture">System Architecture Overview</a></li>
+        <li><a href="#database">Database Schema</a></li>
+        <li><a href="#onboarding">User Onboarding Flow</a></li>
+        <li><a href="#user-settings">User Settings</a></li>
+        <li><a href="#admin-product">Admin: Product Configuration</a></li>
+        <li><a href="#admin-user">Admin: User Management</a></li>
+        <li><a href="#free-pro">Free vs Pro Access</a></li>
+        <li><a href="#question-prompt">AI Prompt: Question Generator</a></li>
+        <li><a href="#feedback-prompt">AI Prompt: Feedback Evaluator</a></li>
+        <li><a href="#implementation">Implementation Checklist</a></li>
+      </ol>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- SECTION 1: ARCHITECTURE -->
+    <!-- ============================================ -->
+    <h2 id="architecture">1. System Architecture Overview</h2>
+
+    <div class="section">
+      <div class="section-title">Core Concept: Database-Driven Configuration</div>
+      
+      <p style="margin-bottom: 16px;">The system has three layers of configuration. All UI components read from these tables to determine what options to display.</p>
+
+      <table>
+        <thead>
+          <tr><th>Layer</th><th>What It Controls</th><th>Who Controls It</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Global Config</strong></td>
+            <td>Which languages and levels are available to all users</td>
+            <td>Admin via Product Configuration</td>
+          </tr>
+          <tr>
+            <td><strong>User Override</strong></td>
+            <td>Grant specific users access to non-public languages/levels (beta testing, VIPs)</td>
+            <td>Admin via User Management</td>
+          </tr>
+          <tr>
+            <td><strong>User Profile</strong></td>
+            <td>User's selected language, level, and preferences</td>
+            <td>User via Settings (within allowed options)</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>Access Logic</h3>
+      <pre>User can access a language/level IF:
+  (language_level_config.is_active = true)   -- Globally enabled
+  OR
+  (user_access_override record exists)       -- Admin granted override</pre>
+
+      <h3>Current State (MVP)</h3>
+      <table>
+        <thead>
+          <tr><th>Setting</th><th>MVP Value</th><th>Future (Admin Toggles)</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Target Languages</td><td>Italian only</td><td>German, French, Spanish</td></tr>
+          <tr><td>Levels (Italian)</td><td>B1C only</td><td>A2, B1, B2 (A1, C1, C2 later)</td></tr>
+          <tr><td>Feedback Languages</td><td>All 6 always available</td><td>—</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- SECTION 2: DATABASE -->
+    <!-- ============================================ -->
+    <h2 id="database">2. Database Schema</h2>
+
+    <div class="section">
+      <div class="section-title">Required Tables</div>
+
+      <pre><span class="comment">-- ============================================
+-- CONFIGURATION TABLES
+-- ============================================</span>
+
+<span class="comment">-- Which languages can be learned (Target Languages)</span>
+<span class="keyword">CREATE TABLE</span> language_config (
+    language VARCHAR(50) PRIMARY KEY,
+    flag_emoji VARCHAR(10),
+    display_order INT DEFAULT 0,
+    is_active BOOLEAN DEFAULT false,
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW()
+);
+
+<span class="keyword">INSERT INTO</span> language_config (language, flag_emoji, display_order, is_active) <span class="keyword">VALUES</span>
+    ('Italian', '🇮🇹', 1, true),
+    ('German', '🇩🇪', 2, false),
+    ('French', '🇫🇷', 3, false),
+    ('Spanish', '🇪🇸', 4, false);
+
+<span class="comment">-- Level metadata</span>
+<span class="keyword">CREATE TABLE</span> level_config (
+    level VARCHAR(10) PRIMARY KEY,
+    display_name VARCHAR(100),
+    description TEXT,
+    passing_threshold INT,
+    display_order INT DEFAULT 0
+);
+
+<span class="keyword">INSERT INTO</span> level_config (level, display_name, description, passing_threshold, display_order) <span class="keyword">VALUES</span>
+    ('A1', 'Beginner', 'Basic phrases and introductions', 50, 1),
+    ('A2', 'Elementary', 'Long-term residence permit (Permesso di soggiorno)', 55, 2),
+    ('B1', 'Intermediate', 'Work permit, professional Italian', 60, 3),
+    ('B1C', 'Citizenship Exam', 'Italian citizenship (Cittadinanza) — CILS, CELI, PLIDA', 60, 4),
+    ('B2', 'Upper Intermediate', 'University admission, skilled professions', 60, 5),
+    ('C1', 'Advanced', 'Professional and academic advanced', 65, 6),
+    ('C2', 'Mastery', 'Near-native fluency', 70, 7);
+
+<span class="comment">-- Which levels are available for each language (the matrix)</span>
+<span class="keyword">CREATE TABLE</span> language_level_config (
+    language VARCHAR(50) REFERENCES language_config(language),
+    level VARCHAR(10) REFERENCES level_config(level),
+    is_active BOOLEAN DEFAULT false,
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW(),
+    PRIMARY KEY (language, level)
+);
+
+<span class="comment">-- MVP: Only Italian B1C is active</span>
+<span class="keyword">INSERT INTO</span> language_level_config (language, level, is_active) <span class="keyword">VALUES</span>
+    ('Italian', 'A1', false),
+    ('Italian', 'A2', false),
+    ('Italian', 'B1', false),
+    ('Italian', 'B1C', true),   <span class="comment">-- Only this is active for MVP</span>
+    ('Italian', 'B2', false),
+    ('Italian', 'C1', false),
+    ('Italian', 'C2', false),
+    ('German', 'A1', false),
+    ('German', 'A2', false),
+    ('German', 'B1', false),
+    ('German', 'B1C', false),
+    ('German', 'B2', false),
+    ('German', 'C1', false),
+    ('German', 'C2', false),
+    ('French', 'A1', false),
+    ('French', 'A2', false),
+    ('French', 'B1', false),
+    ('French', 'B1C', false),
+    ('French', 'B2', false),
+    ('French', 'C1', false),
+    ('French', 'C2', false),
+    ('Spanish', 'A1', false),
+    ('Spanish', 'A2', false),
+    ('Spanish', 'B1', false),
+    ('Spanish', 'B1C', false),
+    ('Spanish', 'B2', false),
+    ('Spanish', 'C1', false),
+    ('Spanish', 'C2', false);
+
+<span class="comment">-- Feedback languages (hardcoded list, no table needed)
+-- English, French, Spanish, German, Italian, Portuguese</span>
+
+<span class="comment">-- ============================================
+-- USER TABLES
+-- ============================================</span>
+
+<span class="comment">-- Add columns to existing users table</span>
+<span class="keyword">ALTER TABLE</span> users <span class="keyword">ADD COLUMN</span> primary_language VARCHAR(50) DEFAULT 'English';
+<span class="keyword">ALTER TABLE</span> users <span class="keyword">ADD COLUMN</span> target_language VARCHAR(50) DEFAULT 'Italian';
+<span class="keyword">ALTER TABLE</span> users <span class="keyword">ADD COLUMN</span> current_level VARCHAR(10) DEFAULT 'B1C';
+<span class="keyword">ALTER TABLE</span> users <span class="keyword">ADD COLUMN</span> daily_goal_minutes INT DEFAULT 30;
+<span class="keyword">ALTER TABLE</span> users <span class="keyword">ADD COLUMN</span> onboarding_completed BOOLEAN DEFAULT false;
+<span class="keyword">ALTER TABLE</span> users <span class="keyword">ADD COLUMN</span> primary_language_changed_at TIMESTAMP;
+
+<span class="comment">-- Admin overrides for beta testing / VIP access</span>
+<span class="keyword">CREATE TABLE</span> user_access_override (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+    language VARCHAR(50),
+    level VARCHAR(10),
+    granted_by UUID REFERENCES users(id),
+    granted_at TIMESTAMP DEFAULT NOW(),
+    reason VARCHAR(255),
+    UNIQUE (user_id, language, level)
+);
+
+<span class="comment">-- ============================================
+-- TRACKING TABLES
+-- ============================================</span>
+
+<span class="comment">-- Track users who wanted something we don't offer yet</span>
+<span class="keyword">CREATE TABLE</span> interest_waitlist (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID REFERENCES users(id),
+    email VARCHAR(255),
+    interest_type VARCHAR(50),  <span class="comment">-- 'A2', 'B1', 'B2', 'general', 'other_language'</span>
+    language_requested VARCHAR(50),
+    created_at TIMESTAMP DEFAULT NOW(),
+    converted_to_b1c BOOLEAN DEFAULT false,
+    notified_at TIMESTAMP
+);
+
+<span class="comment">-- ============================================
+-- PROMPT VERSION CONTROL
+-- ============================================</span>
+
+<span class="keyword">CREATE TABLE</span> prompt_versions (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    prompt_type VARCHAR(50) NOT NULL,  <span class="comment">-- 'question_generator' | 'feedback_evaluator'</span>
+    version_number VARCHAR(10) NOT NULL,
+    content TEXT NOT NULL,
+    commit_message VARCHAR(255),
+    status VARCHAR(20) DEFAULT 'draft',  <span class="comment">-- 'draft' | 'production' | 'archived'</span>
+    created_by UUID REFERENCES users(id),
+    created_at TIMESTAMP DEFAULT NOW(),
+    deployed_at TIMESTAMP
+);
+
+<span class="comment">-- Ensure only ONE production version per prompt type</span>
+<span class="keyword">CREATE UNIQUE INDEX</span> idx_prompt_versions_production 
+    ON prompt_versions (prompt_type) 
+    WHERE status = 'production';
+
+<span class="keyword">CREATE TABLE</span> prompt_rollback_log (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    prompt_type VARCHAR(50) NOT NULL,
+    from_version VARCHAR(10) NOT NULL,
+    to_version VARCHAR(10) NOT NULL,
+    rolled_back_by UUID REFERENCES users(id),
+    rolled_back_at TIMESTAMP DEFAULT NOW(),
+    reason TEXT
+);</pre>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- SECTION 3: ONBOARDING -->
+    <!-- ============================================ -->
+    <h2 id="onboarding">3. User Onboarding Flow</h2>
+
+    <div class="section">
+      <div class="section-title">New User Wizard</div>
+      
+      <p style="margin-bottom: 16px;">All new users go through this wizard. Existing users with <code>onboarding_completed = false</code> are also redirected here on login.</p>
+
+      <h3>Step 1: Feedback Language</h3>
+      <div class="ui-mockup">
+        <div class="ui-mockup-title">Onboarding Step 1 of 3</div>
+        <p style="font-size: 18px; font-weight: 600; margin-bottom: 8px;">What language do you speak?</p>
+        <p style="color: #94a3b8; margin-bottom: 16px;">We'll give you feedback and instructions in this language.</p>
+        <p style="color: #22d3ee;">[Dropdown: English, French, Spanish, German, Italian, Portuguese]</p>
+      </div>
+      <p><strong>Logic:</strong> Always show all 6 options. Save to <code>users.primary_language</code>.</p>
+
+      <h3>Step 2: Citizenship Question</h3>
+      <div class="ui-mockup">
+        <div class="ui-mockup-title">Onboarding Step 2 of 3</div>
+        <p style="font-size: 18px; font-weight: 600; margin-bottom: 8px;">Are you preparing for the Italian citizenship exam?</p>
+        <p style="color: #94a3b8; margin-bottom: 16px;">ProntoCorso specializes in B1C citizenship exam preparation.</p>
+        <p style="color: #22d3ee;">[Yes, I'm preparing for citizenship] [No, I have a different goal]</p>
+      </div>
+
+      <h3>If "Yes" → Skip to Step 3</h3>
+      <p>Set <code>target_language = 'Italian'</code>, <code>current_level = 'B1C'</code>, proceed to daily goal.</p>
+
+      <h3>If "No" → Waitlist Capture Screen</h3>
+      <div class="ui-mockup">
+        <div class="ui-mockup-title">Interest Capture</div>
+        <p style="font-size: 18px; font-weight: 600; margin-bottom: 8px;">We're expanding soon!</p>
+        <p style="color: #94a3b8; margin-bottom: 16px;">What are you looking for?</p>
+        <p style="margin-bottom: 8px;">○ A2 - Residence permit (Permesso di soggiorno)</p>
+        <p style="margin-bottom: 8px;">○ B1 - Work / Professional Italian</p>
+        <p style="margin-bottom: 8px;">○ B2 - University / Advanced professional</p>
+        <p style="margin-bottom: 8px;">○ General Italian learning</p>
+        <p style="margin-bottom: 16px;">○ Another language entirely → [Which? ____]</p>
+        <p style="color: #94a3b8; margin-bottom: 8px;">📧 Want us to notify you when this is available?</p>
+        <p style="color: #22d3ee; margin-bottom: 16px;">[Email field] [Notify Me]</p>
+        <p style="border-top: 1px solid #475569; padding-top: 16px; margin-top: 16px;">Or: [Start with Citizenship Prep Anyway →]</p>
+        <p style="color: #94a3b8; font-size: 12px;">Our B1C content builds strong foundations for any Italian goal.</p>
+      </div>
+
+      <p><strong>Logic:</strong></p>
+      <ul>
+        <li>Log selection to <code>interest_waitlist</code> table</li>
+        <li>Track: user_id, interest_type, language_requested, email</li>
+        <li>If they click "Notify Me" → save email, show confirmation</li>
+        <li>If they click "Start Anyway" → set <code>converted_to_b1c = true</code>, proceed to Step 3</li>
+      </ul>
+
+      <h3>Step 3: Daily Goal</h3>
+      <div class="ui-mockup">
+        <div class="ui-mockup-title">Onboarding Step 3 of 3</div>
+        <p style="font-size: 18px; font-weight: 600; margin-bottom: 8px;">Set your daily practice goal</p>
+        <p style="color: #94a3b8; margin-bottom: 16px;">How much time can you commit each day?</p>
+        <p style="color: #22d3ee;">○ 15 minutes &nbsp; ○ 30 minutes &nbsp; ○ 45 minutes &nbsp; ○ 60 minutes</p>
+      </div>
+      <p><strong>Logic:</strong> Save to <code>users.daily_goal_minutes</code>. Set <code>onboarding_completed = true</code>. Redirect to Practice page.</p>
+
+      <div class="callout callout-warning">
+        <h4>Existing Users</h4>
+        <p>Run a migration to set <code>onboarding_completed = false</code> for all existing users. They will see this wizard on their next login and can confirm or update their preferences.</p>
+      </div>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- SECTION 4: USER SETTINGS -->
+    <!-- ============================================ -->
+    <h2 id="user-settings">4. User Settings</h2>
+
+    <div class="section">
+      <div class="section-title">Settings Page (User-Facing)</div>
+
+      <table>
+        <thead>
+          <tr><th>Setting</th><th>Free User</th><th>Pro User</th><th>Constraints</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Primary Language (feedback)</td>
+            <td>Can change</td>
+            <td>Can change</td>
+            <td>Once per month. Check <code>primary_language_changed_at</code>.</td>
+          </tr>
+          <tr>
+            <td>Target Language</td>
+            <td>View only (Italian)</td>
+            <td>Can change</td>
+            <td>Only languages user has access to (global OR override).</td>
+          </tr>
+          <tr>
+            <td>Current Level</td>
+            <td>View only (B1C)</td>
+            <td>Can change</td>
+            <td>Only levels active for their target language.</td>
+          </tr>
+          <tr>
+            <td>Daily Goal</td>
+            <td>Can change</td>
+            <td>Can change</td>
+            <td>15, 30, 45, or 60 minutes.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>Query: Get Available Levels for User</h3>
+      <pre>SELECT llc.level, lc.display_name, lc.description
+FROM language_level_config llc
+JOIN level_config lc ON llc.level = lc.level
+WHERE llc.language = {user.target_language}
+  AND (
+    llc.is_active = true
+    OR EXISTS (
+      SELECT 1 FROM user_access_override uao
+      WHERE uao.user_id = {user.id}
+        AND uao.language = llc.language
+        AND uao.level = llc.level
+    )
+  )
+ORDER BY lc.display_order;</pre>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- SECTION 5: ADMIN PRODUCT CONFIG -->
+    <!-- ============================================ -->
+    <h2 id="admin-product">5. Admin: Product Configuration</h2>
+
+    <div class="section">
+      <div class="section-title">Product Configuration Page</div>
+      
+      <p style="margin-bottom: 16px;">This page allows admins to control which languages and levels are available globally to all users.</p>
+
+      <div class="ui-mockup">
+        <div class="ui-mockup-title">Admin → Product Configuration</div>
+        <p style="font-size: 16px; font-weight: 600; margin-bottom: 16px;">Target Languages</p>
+        <p style="margin-bottom: 8px;">☑ Italian 🇮🇹</p>
+        <p style="margin-bottom: 8px;">☐ German 🇩🇪</p>
+        <p style="margin-bottom: 8px;">☐ French 🇫🇷</p>
+        <p style="margin-bottom: 16px;">☐ Spanish 🇪🇸</p>
+        
+        <p style="font-size: 16px; font-weight: 600; margin-bottom: 16px; margin-top: 24px;">Levels by Language</p>
+        <p style="color: #94a3b8; margin-bottom: 12px;">Italian:</p>
+        <p style="margin-bottom: 16px;">☐ A1 &nbsp; ☐ A2 &nbsp; ☐ B1 &nbsp; ☑ B1C &nbsp; ☐ B2 &nbsp; ☐ C1 &nbsp; ☐ C2</p>
+        <p style="color: #94a3b8; margin-bottom: 12px;">German:</p>
+        <p style="margin-bottom: 16px;">☐ A1 &nbsp; ☐ A2 &nbsp; ☐ B1 &nbsp; ☐ B1C &nbsp; ☐ B2 &nbsp; ☐ C1 &nbsp; ☐ C2</p>
+        <p style="color: #94a3b8; margin-bottom: 12px;">French:</p>
+        <p style="margin-bottom: 16px;">☐ A1 &nbsp; ☐ A2 &nbsp; ☐ B1 &nbsp; ☐ B1C &nbsp; ☐ B2 &nbsp; ☐ C1 &nbsp; ☐ C2</p>
+        <p style="color: #94a3b8; margin-bottom: 12px;">Spanish:</p>
+        <p style="margin-bottom: 24px;">☐ A1 &nbsp; ☐ A2 &nbsp; ☐ B1 &nbsp; ☐ B1C &nbsp; ☐ B2 &nbsp; ☐ C1 &nbsp; ☐ C2</p>
+        
+        <p style="color: #22d3ee;">[Save Configuration]</p>
+      </div>
+
+      <h3>Save Logic</h3>
+      <pre><span class="comment">// When admin saves:</span>
+<span class="comment">// 1. Update language_config.is_active for each language</span>
+<span class="comment">// 2. Update language_level_config.is_active for each language/level pair</span>
+<span class="comment">// 3. Set updated_at timestamps</span>
+
+<span class="comment">// Changes take effect immediately for all users</span></pre>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- SECTION 6: ADMIN USER MANAGEMENT -->
+    <!-- ============================================ -->
+    <h2 id="admin-user">6. Admin: User Management</h2>
+
+    <div class="section">
+      <div class="section-title">Edit User Modal</div>
+      
+      <p style="margin-bottom: 16px;">Admins can view and modify any user's settings, plus grant access to non-public languages/levels for beta testing.</p>
+
+      <div class="ui-mockup">
+        <div class="ui-mockup-title">Admin → User Management → Edit User</div>
+        <p style="font-size: 16px; font-weight: 600; margin-bottom: 16px;">User: Benedetta Rossi</p>
+        
+        <p style="font-size: 14px; font-weight: 600; margin-bottom: 12px;">Standard Settings</p>
+        <p style="margin-bottom: 8px;">Primary Language: [English ▼]</p>
+        <p style="margin-bottom: 8px;">Target Language: [Italian ▼]</p>
+        <p style="margin-bottom: 8px;">Current Level: [B1C ▼]</p>
+        <p style="margin-bottom: 8px;">Daily Goal: [30 min ▼]</p>
+        <p style="margin-bottom: 16px;">Subscription: Pro</p>
+        
+        <p style="border-top: 1px solid #475569; padding-top: 16px; margin-top: 16px;"></p>
+        
+        <p style="font-size: 14px; font-weight: 600; margin-bottom: 12px;">🔓 Beta Access Overrides</p>
+        <p style="color: #94a3b8; font-size: 12px; margin-bottom: 12px;">Grant access to languages/levels not publicly available:</p>
+        
+        <p style="margin-bottom: 8px;">Additional Languages:</p>
+        <p style="margin-bottom: 16px;">☐ German &nbsp; ☐ French &nbsp; ☐ Spanish</p>
+        
+        <p style="margin-bottom: 8px;">Additional Levels (for Italian):</p>
+        <p style="margin-bottom: 16px;">☐ A1 &nbsp; ☑ A2 &nbsp; ☐ B1 &nbsp; ☑ B1C &nbsp; ☐ B2 &nbsp; ☐ C1 &nbsp; ☐ C2</p>
+        
+        <p style="margin-bottom: 8px;">Reason: [Beta tester ____]</p>
+        
+        <p style="color: #22d3ee; margin-top: 16px;">[Save Changes]</p>
+      </div>
+
+      <h3>Override Logic</h3>
+      <pre><span class="comment">// When admin grants override:</span>
+INSERT INTO user_access_override (user_id, language, level, granted_by, reason)
+VALUES ({user_id}, 'Italian', 'A2', {admin_id}, 'Beta tester');
+
+<span class="comment">// When checking user access:</span>
+SELECT * FROM language_level_config WHERE is_active = true
+UNION
+SELECT language, level FROM user_access_override WHERE user_id = {user_id};</pre>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- SECTION 7: FREE VS PRO -->
+    <!-- ============================================ -->
+    <h2 id="free-pro">7. Free vs Pro Access</h2>
+
+    <div class="section">
+      <div class="section-title">Subscription Tiers</div>
+
+      <table>
+        <thead>
+          <tr><th>Feature</th><th>Free</th><th>Pro</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Questions per day</td>
+            <td>1 random question</td>
+            <td>Unlimited</td>
+          </tr>
+          <tr>
+            <td>Feedback detail</td>
+            <td>Score only (e.g., "4/6 correct")</td>
+            <td>Full AI feedback (strengths, improvements, tips)</td>
+          </tr>
+          <tr>
+            <td>Target Language</td>
+            <td>Italian (locked)</td>
+            <td>Any active language</td>
+          </tr>
+          <tr>
+            <td>Level</td>
+            <td>B1C (locked)</td>
+            <td>Any active level for their language</td>
+          </tr>
+          <tr>
+            <td>Change settings</td>
+            <td>Feedback language + daily goal only</td>
+            <td>All settings</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="callout callout-info">
+        <h4>Free User Feedback Display</h4>
+        <p>After completing their 1 daily question, free users see:<br><br>
+        <strong>"You scored 4/6 correct (67%)"</strong><br><br>
+        <em>"Want detailed feedback on your strengths, areas to improve, and personalized tips? Upgrade to Pro."</em><br><br>
+        [Upgrade to Pro →]</p>
+      </div>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- SECTION 8: QUESTION GENERATOR PROMPT -->
+    <!-- ============================================ -->
+    <h2 id="question-prompt">8. AI Prompt: Question Generator</h2>
+
+    <div class="section">
+      <div class="section-title">Full Prompt Template</div>
+      
+      <div class="prompt-block"><span class="section-header"># [SYSTEM_ROLE]</span>
+ROLE=<span class="var">{TARGET_LANGUAGE}</span>_<span class="var">{LEVEL}</span>_GENERATOR
+MODE=STRICT_EXECUTION
+KNOWLEDGE_BASE=INTERNAL_CEFR_DESCRIPTORS_ONLY
+TOOLS=NO_WEB_SEARCH
+
+<span class="section-header"># [LEVEL_CONFIG]</span>
+
+IF LEVEL == "A1":
+   VOCAB_RANGE = "500 most frequent words"
+   GRAMMAR = "Present tense, basic agreement"
+   TEXT_LENGTH = "30-50 words"
+   AUDIO_LENGTH = "30-60 seconds"
+   SPEECH_TIME = "1 minute"
+
+IF LEVEL == "A2":
+   VOCAB_RANGE = "1000-1500 high frequency"
+   GRAMMAR = "Present, simple past, basic connectors"
+   TEXT_LENGTH = "80-120 words"
+   AUDIO_LENGTH = "1-2 minutes"
+   SPEECH_TIME = "1-2 minutes"
+
+IF LEVEL == "B1" OR LEVEL == "B1C":
+   VOCAB_RANGE = "2000-3000 functional vocabulary"
+   GRAMMAR = "Present, past tenses, future, conditional"
+   TEXT_LENGTH = "200-300 words"
+   AUDIO_LENGTH = "3-4 minutes"
+   SPEECH_TIME = "2-3 minutes"
+
+IF LEVEL == "B2":
+   VOCAB_RANGE = "4000-5000 including abstract"
+   GRAMMAR = "All indicative tenses, subjunctive present, complex clauses"
+   TEXT_LENGTH = "350-450 words"
+   AUDIO_LENGTH = "4-5 minutes"
+   SPEECH_TIME = "3-4 minutes"
+
+IF LEVEL == "C1":
+   VOCAB_RANGE = "6000+ including idiomatic"
+   GRAMMAR = "Full subjunctive, hypotheticals, implicit subjects"
+   TEXT_LENGTH = "500-700 words"
+   AUDIO_LENGTH = "5-7 minutes"
+   SPEECH_TIME = "4-5 minutes"
+
+IF LEVEL == "C2":
+   VOCAB_RANGE = "Native-level including regional/archaic"
+   GRAMMAR = "All structures, stylistic variation, literary forms"
+   TEXT_LENGTH = "600-900 words"
+   AUDIO_LENGTH = "7-10 minutes"
+   SPEECH_TIME = "5-7 minutes"
+
+<span class="section-header"># [DOMAIN_CONFIG]</span>
+
+IF LEVEL == "B1C":
+   DOMAINS = ["Health (Medical/Hospital)", "Education (School/Training)", "Work (Contracts/Safety)", "Housing (Rent/Property)", "Bureaucracy (Government/Post Office)", "Daily Commerce (Shopping/Services)"]
+   TONE = "Formal (Government) or Semi-formal (Service interactions)"
+ELSE:
+   DOMAINS = ["Travel", "Leisure", "Family", "Shopping", "Work", "Health", "Education", "Media"]
+   TONE = "Informal to Semi-formal"
+
+<span class="section-header"># [TASK_REGISTRY]</span>
+
+* L-01: Listening (Short Interactions). 6 unconnected dialogues. ~50-60 words each. 6 Qs. MCQ (4 Options).
+* L-02: Listening (Public Info). 1 continuous monologue. 6 Qs. MCQ (4 Options).
+* R-01: Reading (Information Search). 4 short functional texts (A-D). 5 Statements to match.
+* R-02: Reading (Comprehension). 1 continuous text. 7 Qs. MCQ (4 Options).
+* W-01: Writing (Functional). Email to authority OR Narrative. Word count per LEVEL_CONFIG.
+* S-01: Speaking (Transaction). Face-to-face dialogue. Time per LEVEL_CONFIG.
+* S-02: Speaking (Monologue). Description of image or topic. Time per LEVEL_CONFIG.
+
+<span class="section-header"># [CONSTRAINTS]</span>
+
+1. LEVEL: CEFR <span class="var">{LEVEL}</span>
+2. VOCAB: Appropriate for <span class="var">{LEVEL}</span> as defined in LEVEL_CONFIG
+3. GRAMMAR (INPUT): Passive voice allowed at B1+
+4. GRAMMAR (OUTPUT TARGET): Structures from LEVEL_CONFIG
+5. DISTRACTOR_POLICY: 1 Correct, 2 Plausible, 1 Clearly Incorrect. BANNED: "None/All of the above"
+6. TONE: As defined in DOMAIN_CONFIG
+7. DATA_SOURCE: Internal CEFR descriptors only. NO external URLs.
+
+<span class="section-header"># [LANG_PROTOCOL]</span>
+
+* METADATA = ENGLISH
+* NOTES = ENGLISH
+* STUDENT_INSTRUCTIONS = <span class="var">{TARGET_LANGUAGE}</span>
+* CONTENT = <span class="var">{TARGET_LANGUAGE}</span>
+
+<span class="section-header"># [LOGIC: DOMAIN]</span>
+
+IF DOMAIN == "Auto":
+   >>> RANDOM SELECTOR from DOMAINS (avoid repetition)
+
+<span class="section-header"># [ZONING_MAP]</span>
+
+* LISTENING: Script={TEACHER_ONLY} | Questions={STUDENT_HANDOUT}
+* READING (R-01): 4 Texts={STUDENT_HANDOUT} | Key={TEACHER_ONLY}
+* READING (R-02): Text={STUDENT_HANDOUT} | Questions={STUDENT_HANDOUT} | Key={TEACHER_ONLY}
+* WRITING: Prompt={STUDENT_HANDOUT} | Model_Answer={TEACHER_ONLY}
+* SPEAKING: Examiner_Script={TEACHER_ONLY} | Student_Card={STUDENT_HANDOUT}
+
+<span class="section-header"># [OUTPUT_SCHEMA]</span>
+
+============================================================
+1. HEADER: <span class="var">{LEVEL}</span> | <span class="var">{SKILL}</span> | <span class="var">{TASK_ID}</span> | <span class="var">{DOMAIN}</span> | Topic
+============================================================
+[ PART 1: TEACHER_PACK (SECURE) ]
+============================================================
+[CONTENT / SCRIPT in <span class="var">{TARGET_LANGUAGE}</span>]
+[KEY with English rationale]
+--- CUT HERE ---
+[ PART 2: STUDENT_HANDOUT (PRINTABLE) ]
+--- CUT HERE ---
+**<span class="var">{TARGET_LANGUAGE}</span> <span class="var">{LEVEL}</span> - [SKILL NAME in <span class="var">{TARGET_LANGUAGE}</span>]**
+[INSTRUCTIONS in <span class="var">{TARGET_LANGUAGE}</span>]
+[STIMULUS in <span class="var">{TARGET_LANGUAGE}</span>]
+[QUESTIONS in <span class="var">{TARGET_LANGUAGE}</span>]
+============================================================
+
+<span class="section-header"># [CALIBRATION_METRICS]</span>
+
+* LEXICAL: Verify vocabulary matches <span class="var">{LEVEL}</span>
+* LENGTH: Per LEVEL_CONFIG
+* CHECK: Assesses CEFR 'Can Do' statements for <span class="var">{LEVEL}</span>?
+
+<span class="section-header">===============================================================</span>
+<span class="section-header"># [USER_INPUT] — INJECT VALUES FROM USER PROFILE + SESSION</span>
+<span class="section-header">===============================================================</span>
+
+LEVEL: <span class="var">{LEVEL}</span>
+TARGET_LANGUAGE: <span class="var">{TARGET_LANGUAGE}</span>
+SKILL: <span class="var">{SKILL}</span>
+TASK_ID: <span class="var">{TASK_ID}</span>
+DOMAIN: <span class="var">{DOMAIN}</span></div>
+
+      <h3>Variable Sources</h3>
+      <table>
+        <thead>
+          <tr><th>Variable</th><th>Source</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>{LEVEL}</code></td><td><code>users.current_level</code></td></tr>
+          <tr><td><code>{TARGET_LANGUAGE}</code></td><td><code>users.target_language</code></td></tr>
+          <tr><td><code>{SKILL}</code></td><td>Session: User clicks Reading/Listening/Writing/Speaking</td></tr>
+          <tr><td><code>{TASK_ID}</code></td><td>Session: Derived from skill or randomly assigned</td></tr>
+          <tr><td><code>{DOMAIN}</code></td><td>Session: Auto (random) or user-selected if available</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- SECTION 9: FEEDBACK EVALUATOR PROMPT -->
+    <!-- ============================================ -->
+    <h2 id="feedback-prompt">9. AI Prompt: Feedback Evaluator</h2>
+
+    <div class="section">
+      <div class="section-title">Full Prompt Template</div>
+
+      <div class="prompt-block"><span class="section-header"># CEFR Feedback Evaluator</span>
+
+You are the world's most accurate, honest, and motivating CEFR feedback coach.
+Never suggest specific weeks/months. Stay realistic and positive.
+Never invent evidence. Apply official CEFR descriptors conservatively.
+
+<span class="section-header"># [SYSTEM CONFIG]</span>
+
+SYSTEM_MODE = ONE-SHOT EVALUATOR (Do not converse. Output only the feedback card.)
+LEVEL = <span class="var">{LEVEL}</span>
+TARGET_LANGUAGE = <span class="var">{TARGET_LANGUAGE}</span>
+PRIMARY_LANGUAGE = <span class="var">{PRIMARY_LANGUAGE}</span>
+TASK_ID = <span class="var">{TASK_ID}</span>
+SKILL = <span class="var">{SKILL}</span>
+TARGET_FLAG = <span class="var">{TARGET_FLAG}</span>
+
+<span class="section-header"># [LANGUAGE PATTERN]</span>
+
+* Section headings and explanations: <span class="var">{PRIMARY_LANGUAGE}</span>
+* Corrections, examples, rewrites: <span class="var">{TARGET_LANGUAGE}</span>
+* 5-minute power tip: Explain in <span class="var">{PRIMARY_LANGUAGE}</span>, example in <span class="var">{TARGET_LANGUAGE}</span>
+* Motivational close: First in <span class="var">{TARGET_LANGUAGE}</span>, then <span class="var">{PRIMARY_LANGUAGE}</span> translation
+
+<span class="section-header"># [LEVEL_CONFIG]</span>
+
+IF LEVEL == "A1":
+   PASSING_THRESHOLD = 50
+   BANDS = {"0-19": "[Pre-A1]", "20-39": "[A1-]", "40-59": "[A1]", "60-79": "[A1+]", "80-100": "[A2]"}
+
+IF LEVEL == "A2":
+   PASSING_THRESHOLD = 55
+   BANDS = {"0-24": "[A1]", "25-44": "[A2-]", "45-64": "[A2]", "65-84": "[A2+]", "85-100": "[B1]"}
+
+IF LEVEL == "B1" OR LEVEL == "B1C":
+   PASSING_THRESHOLD = 60
+   BANDS = {"0-29": "[A1]", "30-49": "[A2]", "50-59": "[A2+]", "60-74": "[B1]", "75-89": "[B1+]", "90-100": "[B2]"}
+
+IF LEVEL == "B2":
+   PASSING_THRESHOLD = 60
+   BANDS = {"0-29": "[A2]", "30-49": "[B1]", "50-59": "[B1+]", "60-74": "[B2]", "75-89": "[B2+]", "90-100": "[C1]"}
+
+IF LEVEL == "C1":
+   PASSING_THRESHOLD = 65
+   BANDS = {"0-34": "[B1]", "35-54": "[B2]", "55-69": "[B2+]", "70-84": "[C1]", "85-100": "[C1+/C2]"}
+
+IF LEVEL == "C2":
+   PASSING_THRESHOLD = 70
+   BANDS = {"0-39": "[B2]", "40-59": "[C1]", "60-79": "[C1+]", "80-100": "[C2]"}
+
+<span class="section-header"># [READINESS_MAP]</span>
+
+score_gap = (student_score - PASSING_THRESHOLD)
+
+IF score_gap < -30: READINESS = "10-20%", MESSAGE = "You are just getting started. Every session moves the needle."
+IF score_gap >= -30 AND < -15: READINESS = "30-45%", MESSAGE = "Foundations are forming. Keep going exactly like this."
+IF score_gap >= -15 AND < 0: READINESS = "50-60%", MESSAGE = "You are building momentum. The goal is clearly visible now."
+IF score_gap >= 0 AND < 15: READINESS = "65-80%", MESSAGE = "You are in a solid position for this skill. Great progress!"
+IF score_gap >= 15 AND < 25: READINESS = "85-92%", MESSAGE = "Extremely solid. This skill is one of your strongest."
+IF score_gap >= 25: READINESS = "95-99%", MESSAGE = "Exceptional performance. Well above the requirement!"
+
+<span class="section-header"># [SCORING RULES]</span>
+
+* Reading/Listening: (correct / total) x 100, then map to BANDS
+* Writing/Speaking: Holistic CEFR judgment (task achievement, range, accuracy, fluency), then map to BANDS
+
+<span class="section-header">===============================================================</span>
+<span class="section-header"># [INPUT DATA] — SYSTEM INJECTION (6 PLACEHOLDERS)</span>
+<span class="section-header">===============================================================</span>
+
+**1. TASK_ID:**
+"""
+<span class="var">{TASK_ID}</span>
+"""
+
+**2. CONTEXT (The Question/Prompt the student saw):**
+"""
+<span class="var">{CONTEXT}</span>
+"""
+
+**3. ANSWER_KEY (Required for L-01/L-02/R-01/R-02, else N/A):**
+"""
+<span class="var">{ANSWER_KEY}</span>
+"""
+
+**4. MODEL_ANSWER (Required for W-01/S-01/S-02, else N/A):**
+"""
+<span class="var">{MODEL_ANSWER}</span>
+"""
+
+**5. STUDENT_RESPONSE (Required for all):**
+"""
+<span class="var">{STUDENT_RESPONSE}</span>
+"""
+
+**6. WORD_COUNT (Optional):**
+"""
+<span class="var">{WORD_COUNT}</span>
+"""
+
+ERROR HANDLING: If inputs missing, reply in <span class="var">{PRIMARY_LANGUAGE}</span>: "Please provide the task ID, context, answer key (if applicable), and student response."
+
+<span class="section-header">===============================================================</span>
+<span class="section-header"># [OUTPUT FORMAT] — TONE-LOCKED: DO NOT CHANGE STRUCTURE OR EMOJIS</span>
+<span class="section-header">===============================================================</span>
+
+==================================
+<span class="var">{LEVEL}</span> <span class="var">{TARGET_LANGUAGE}</span> - <span class="var">{SKILL}</span>
+==================================
+
+✅ **What you already do really well**
+• [Strength 1 - explain in <span class="var">{PRIMARY_LANGUAGE}</span>, quote example in <span class="var">{TARGET_LANGUAGE}</span>]
+• [Strength 2]
+• [Strength 3]
+
+🔧 **Small, concrete steps to improve steadily**
+• [Improvement 1 - explain in <span class="var">{PRIMARY_LANGUAGE}</span>, show correct form in <span class="var">{TARGET_LANGUAGE}</span>]
+• [Improvement 2]
+• [Improvement 3]
+
+📊 **Your CEFR profile today**
+Overall → [BAND], Comprehension → [BAND], Accuracy → [BAND], Range → [BAND]
+
+🎯 **Score for this submission**
+[score] / 100
+[Status line in <span class="var">{PRIMARY_LANGUAGE}</span>]
+
+📈 **Readiness for your goal**
+[READINESS]%, [MESSAGE in <span class="var">{PRIMARY_LANGUAGE}</span>]
+
+💡 **Your 5-minute power tip**
+[ONE specific tip in <span class="var">{PRIMARY_LANGUAGE}</span> addressing the biggest error pattern]
+[Same tip as natural example in <span class="var">{TARGET_LANGUAGE}</span>]
+
+💙 **You are making real progress**
+[AI generates ONE fresh motivational close in <span class="var">{TARGET_LANGUAGE}</span>]
+[Translation in <span class="var">{PRIMARY_LANGUAGE}</span>] <span class="var">{TARGET_FLAG}</span>
+
+<span class="section-header">===============================================================</span>
+<span class="section-header"># [TONE GUIDANCE FOR MOTIVATIONAL CLOSE]</span>
+<span class="section-header">===============================================================</span>
+
+AI generates fresh phrases matching this pattern:
+- Connects today's effort to future goal
+- Short and punchy (under 12 words)
+- Uses "you" directly
+- Ends with forward momentum
+- Culturally appropriate for <span class="var">{TARGET_LANGUAGE}</span>
+- Never repeat exact wording from previous feedback
+
+<span class="section-header">===============================================================</span>
+<span class="section-header"># [USER_INPUT] — INJECT VALUES</span>
+<span class="section-header">===============================================================</span>
+
+<span class="comment">## User Profile</span>
+LEVEL: <span class="var">{LEVEL}</span>
+TARGET_LANGUAGE: <span class="var">{TARGET_LANGUAGE}</span>
+PRIMARY_LANGUAGE: <span class="var">{PRIMARY_LANGUAGE}</span>
+TARGET_FLAG: <span class="var">{TARGET_FLAG}</span>
+
+<span class="comment">## Task Data (from task_instances table)</span>
+TASK_ID: <span class="var">{TASK_ID}</span>
+CONTEXT: <span class="var">{CONTEXT}</span>
+ANSWER_KEY: <span class="var">{ANSWER_KEY}</span>
+MODEL_ANSWER: <span class="var">{MODEL_ANSWER}</span>
+
+<span class="comment">## Student Submission</span>
+STUDENT_RESPONSE: <span class="var">{STUDENT_RESPONSE}</span>
+WORD_COUNT: <span class="var">{WORD_COUNT}</span>
+
+<span class="comment">## Derived (compute from TASK_ID: L=Listening, R=Reading, W=Writing, S=Speaking)</span>
+SKILL: <span class="var">{SKILL}</span></div>
+
+      <h3>Variable Sources</h3>
+      <table>
+        <thead>
+          <tr><th>Variable</th><th>Source</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>{LEVEL}</code></td><td><code>users.current_level</code></td></tr>
+          <tr><td><code>{TARGET_LANGUAGE}</code></td><td><code>users.target_language</code></td></tr>
+          <tr><td><code>{PRIMARY_LANGUAGE}</code></td><td><code>users.primary_language</code></td></tr>
+          <tr><td><code>{TARGET_FLAG}</code></td><td><code>language_config.flag_emoji</code> (lookup by target_language)</td></tr>
+          <tr><td><code>{TASK_ID}</code></td><td><code>task_instances.content.meta.task_id</code></td></tr>
+          <tr><td><code>{CONTEXT}</code></td><td><code>task_instances.content.student_handout</code></td></tr>
+          <tr><td><code>{ANSWER_KEY}</code></td><td><code>task_instances.content.teacher_pack.answer_key</code> (or "N/A")</td></tr>
+          <tr><td><code>{MODEL_ANSWER}</code></td><td><code>task_instances.content.teacher_pack.model_answer</code> (or "N/A")</td></tr>
+          <tr><td><code>{STUDENT_RESPONSE}</code></td><td>User input (text or transcript)</td></tr>
+          <tr><td><code>{WORD_COUNT}</code></td><td>Computed from STUDENT_RESPONSE</td></tr>
+          <tr><td><code>{SKILL}</code></td><td>Derived from TASK_ID first character</td></tr>
+        </tbody>
+      </table>
+
+      <h3>Code Example: Populating Feedback Variables</h3>
+      <pre>async function evaluateFeedback(taskInstanceId, studentResponse, userId) {
+  // 1. Load user profile
+  const user = await db.query(`
+    SELECT current_level, target_language, primary_language 
+    FROM users WHERE id = $1
+  `, [userId]);
+  
+  // 2. Get flag emoji from language_config
+  const langConfig = await db.query(`
+    SELECT flag_emoji FROM language_config WHERE language = $1
+  `, [user.rows[0].target_language]);
+  
+  // 3. Load the task that was originally generated
+  const task = await db.query(`
+    SELECT content FROM task_instances WHERE id = $1
+  `, [taskInstanceId]);
+  const taskData = task.rows[0].content;
+  
+  // 4. Extract context and keys based on task type
+  let context, answerKey, modelAnswer;
+  const taskId = taskData.meta.task_id;
+  
+  if (taskId.startsWith('L') || taskId.startsWith('R')) {
+    // OBJECTIVE TASKS: Need answer key
+    context = JSON.stringify(taskData.student_handout);
+    answerKey = taskData.teacher_pack.answer_key
+      .map((item, idx) => `${idx + 1}-${item.correct}`)
+      .join('\n');
+    modelAnswer = 'N/A';
+  } else {
+    // SUBJECTIVE TASKS: Need model answer
+    context = taskData.student_handout.stimulus.prompt;
+    answerKey = 'N/A';
+    modelAnswer = taskData.teacher_pack.model_answer;
+  }
+  
+  // 5. Derive SKILL from TASK_ID
+  const skillMap = { 'L': 'Listening', 'R': 'Reading', 'W': 'Writing', 'S': 'Speaking' };
+  const skill = skillMap[taskId.charAt(0)];
+  
+  // 6. Load prompt template and replace all placeholders
+  const promptTemplate = await getProductionPrompt('feedback_evaluator');
+  
+  const prompt = promptTemplate
+    .replaceAll('{LEVEL}', user.rows[0].current_level)
+    .replaceAll('{TARGET_LANGUAGE}', user.rows[0].target_language)
+    .replaceAll('{PRIMARY_LANGUAGE}', user.rows[0].primary_language)
+    .replaceAll('{TARGET_FLAG}', langConfig.rows[0].flag_emoji)
+    .replaceAll('{TASK_ID}', taskId)
+    .replaceAll('{SKILL}', skill)
+    .replaceAll('{CONTEXT}', context)
+    .replaceAll('{ANSWER_KEY}', answerKey)
+    .replaceAll('{MODEL_ANSWER}', modelAnswer)
+    .replaceAll('{STUDENT_RESPONSE}', studentResponse)
+    .replaceAll('{WORD_COUNT}', studentResponse.split(/\s+/).length.toString());
+  
+  // 7. Send to AI
+  return await callAI(prompt);
+}</pre>
+
+      <div class="callout callout-warning">
+        <h4>Tone-Locked Elements (Do Not Modify)</h4>
+        <ul style="margin-top: 8px;">
+          <li>Section order: strengths → improvements → profile → score → readiness → tip → motivation</li>
+          <li>Emoji set: ✅ 🔧 📊 🎯 📈 💡 💙</li>
+          <li>"What you already do really well" wording</li>
+          <li>"Small, concrete steps to improve steadily" wording</li>
+          <li>Bilingual pattern: PRIMARY for explanations, TARGET for examples</li>
+          <li>No em-dashes or en-dashes (use commas or periods)</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- SECTION 10: IMPLEMENTATION -->
+    <!-- ============================================ -->
+    <h2 id="implementation">10. Implementation Checklist</h2>
+
+    <div class="section" style="background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%); border-color: #6ee7b7;">
+      <div class="section-title" style="color: #065f46;">Phase 1: Database (Day 1)</div>
+      <ol style="padding-left: 20px; font-size: 14px; color: #065f46;">
+        <li>Create tables: <code>language_config</code>, <code>level_config</code>, <code>language_level_config</code></li>
+        <li>Create tables: <code>user_access_override</code>, <code>interest_waitlist</code></li>
+        <li>Create tables: <code>prompt_versions</code>, <code>prompt_rollback_log</code></li>
+        <li>Add columns to users: <code>primary_language</code>, <code>target_language</code>, <code>current_level</code>, <code>daily_goal_minutes</code>, <code>onboarding_completed</code>, <code>primary_language_changed_at</code></li>
+        <li>Insert seed data for languages, levels, and language_level_config matrix</li>
+        <li>Set <code>onboarding_completed = false</code> for all existing users</li>
+      </ol>
+
+      <div class="divider"></div>
+
+      <div class="section-title" style="color: #065f46;">Phase 2: Onboarding Flow (Day 2-3)</div>
+      <ol style="padding-left: 20px; font-size: 14px; color: #065f46;">
+        <li>Build 3-step onboarding wizard UI</li>
+        <li>Build "No" path waitlist capture screen</li>
+        <li>Implement redirect logic: if <code>onboarding_completed = false</code>, redirect to wizard</li>
+        <li>Log interest_waitlist entries when users click "No"</li>
+        <li>Track conversions when users click "Start Anyway"</li>
+      </ol>
+
+      <div class="divider"></div>
+
+      <div class="section-title" style="color: #065f46;">Phase 3: User Settings (Day 3-4)</div>
+      <ol style="padding-left: 20px; font-size: 14px; color: #065f46;">
+        <li>Build User Settings page with dropdowns</li>
+        <li>Implement access logic: show only options user has access to (global OR override)</li>
+        <li>Implement once-per-month limit for primary_language changes</li>
+        <li>Implement Free vs Pro restrictions on settings</li>
+      </ol>
+
+      <div class="divider"></div>
+
+      <div class="section-title" style="color: #065f46;">Phase 4: Admin UI (Day 4-5)</div>
+      <ol style="padding-left: 20px; font-size: 14px; color: #065f46;">
+        <li>Build Product Configuration page with language and level checkboxes</li>
+        <li>Build Edit User modal with standard settings + override section</li>
+        <li>Implement save logic for both pages</li>
+        <li>Add interest_waitlist report/export</li>
+      </ol>
+
+      <div class="divider"></div>
+
+      <div class="section-title" style="color: #065f46;">Phase 5: Prompt Integration (Day 5-6)</div>
+      <ol style="padding-left: 20px; font-size: 14px; color: #065f46;">
+        <li>Store prompt templates in <code>prompt_versions</code> table</li>
+        <li>Update question generation to read user profile and inject variables</li>
+        <li>Update feedback evaluation to read user profile and inject variables</li>
+        <li>Implement Free tier: score-only feedback display</li>
+        <li>Implement Pro tier: full feedback display</li>
+      </ol>
+
+      <div class="divider"></div>
+
+      <div class="section-title" style="color: #065f46;">Phase 6: Testing (Day 6-7)</div>
+      <ol style="padding-left: 20px; font-size: 14px; color: #065f46;">
+        <li>Test onboarding flow for new users</li>
+        <li>Test onboarding flow for existing users (forced wizard)</li>
+        <li>Test admin override: grant user access to non-public level, verify they can select it</li>
+        <li>Test admin Product Config: enable Italian A2, verify it appears for Pro users</li>
+        <li>Test prompts with different language/level combinations</li>
+        <li>Verify bilingual feedback pattern works correctly</li>
+      </ol>
+    </div>
+
+    <div class="callout callout-success">
+      <h4>After Implementation</h4>
+      <p>Once built, the system is fully configurable via Admin UI. To launch a new level or language:</p>
+      <ol style="margin-top: 8px;">
+        <li>Go to Admin → Product Configuration</li>
+        <li>Check the boxes for the new language/level</li>
+        <li>Click Save</li>
+        <li>Users immediately see the new options</li>
+      </ol>
+      <p style="margin-top: 8px;"><strong>No code changes required.</strong></p>
+    </div>
+
+    <p style="text-align: center; color: var(--text-secondary); font-size: 13px; margin-top: 48px;">
+      Developer Handoff Document — ProntoCorso — January 21, 2026
+    </p>
+  </div>
+</body>
+</html>
