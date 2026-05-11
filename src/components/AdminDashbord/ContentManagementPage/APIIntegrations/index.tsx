@@ -38,12 +38,12 @@ export interface IntegrationTemplate {
 
 // Integration Templates
 const INTEGRATION_TEMPLATES: IntegrationTemplate[] = [
-  { id: 'openai', name: 'OpenAI', icon: 'AI', color: '#10a37f', description: 'GPT-4 Turbo & Advanced AI models', provider: IntegrationProvider.OPENAI },
-  { id: 'grok', name: 'Grok', icon: '⚡', color: '#000000', description: 'xAI Real-time information', provider: IntegrationProvider.GROK },
-  { id: 'cloudinary', name: 'Cloudinary', icon: '☁️', color: '#3448c5', description: 'Image & Video management', provider: IntegrationProvider.CLOUDINARY },
-  { id: 'lemonsqueezy', name: 'Lemon Squeezy', icon: '🍋', color: '#ffe066', description: 'Payments & Subscriptions', provider: IntegrationProvider.LEMONSQUEEZY },
-  { id: 'gemini', name: 'Gemini', icon: '✨', color: '#1a73e8', description: 'Google DeepMind AI Models', provider: IntegrationProvider.GEMINI },
-  { id: 'stripe', name: 'Stripe', icon: '💳', color: '#635bff', description: 'Payment processing', provider: IntegrationProvider.STRIPE },
+  { id: 'openai', name: 'OpenAI', icon: 'AI', color: '#10a37f', description: 'GPT-4 Turbo & Advanced AI models', provider: IntegrationProvider.OPENAI, fields: 'api_key,model_name,organization_id' },
+  { id: 'grok', name: 'Grok', icon: '⚡', color: '#000000', description: 'xAI Real-time information', provider: IntegrationProvider.GROK, fields: 'api_key,model_name' },
+  { id: 'cloudinary', name: 'Cloudinary', icon: '☁️', color: '#3448c5', description: 'Image & Video management', provider: IntegrationProvider.CLOUDINARY, fields: 'cloud_name,api_key,api_secret' },
+  { id: 'lemonsqueezy', name: 'Lemon Squeezy', icon: '🍋', color: '#ffe066', description: 'Payments & Subscriptions', provider: IntegrationProvider.LEMONSQUEEZY, fields: 'api_key,store_id,webhook_secret,variant_id' },
+  { id: 'gemini', name: 'Gemini', icon: '✨', color: '#1a73e8', description: 'Google DeepMind AI Models', provider: IntegrationProvider.GEMINI, fields: 'api_key,model_name' },
+  { id: 'stripe', name: 'Stripe', icon: '💳', color: '#635bff', description: 'Payment processing', provider: IntegrationProvider.STRIPE, fields: 'secret_key,publishable_key,webhook_secret' },
   // { id: 'openrouter', name: 'OpenRouter', icon: 'OP', color: '#6b46c1', description: 'Universal AI provider gateway', provider: IntegrationProvider.OPENROUTER },
   // { id: 'mailjet', name: 'Mailjet', icon: 'MJ', color: '#ffc800', description: 'Newsletter & Transactional email', provider: IntegrationProvider.MAILJET },
   // { id: 'google', name: 'Google Translation', icon: '🌐', color: '#4285f4', description: 'Cloud Translation v3 API', provider: IntegrationProvider.GOOGLE_TRANSLATION },
@@ -231,7 +231,11 @@ function APIIntegrations(): JSX.Element {
     description: '',
     keyLabel: 'API Key',
     fields: '',
+    provider: undefined as IntegrationProvider | undefined,
   });
+
+  const [newIntegrationCredentials, setNewIntegrationCredentials] = useState<Record<string, string>>({});
+  const [newIntegrationPasswordVisibility, setNewIntegrationPasswordVisibility] = useState<Record<string, boolean>>({});
 
   // Local state for form inputs
   const [credentials, setCredentials] = useState<Record<string, CredentialData>>({});
@@ -264,7 +268,40 @@ function APIIntegrations(): JSX.Element {
           key => providerMapping[key] === cred.provider
         );
         if (providerKey) {
-          initialCredentials[providerKey] = cred.maskedCredentials as CredentialData;
+          const template = INTEGRATION_TEMPLATES.find(t => t.provider === cred.provider);
+          const templateFields = template?.fields?.split(',').map(f => f.trim()) || [];
+          
+          const mergedCreds = { ...(cred.maskedCredentials as any) };
+          
+          // Robust casing/alias mapping to unify backend and frontend names
+          const casingMap: Record<string, string> = {
+            'apiKey': 'api_key',
+            'model': 'model_name',
+            'modelName': 'model_name',
+            'organizationId': 'organization_id',
+            'secretKey': 'secret_key',
+            'publishableKey': 'publishable_key',
+            'webhookSecret': 'webhook_secret',
+            'storeId': 'store_id',
+            'variantId': 'variant_id',
+            'cloudName': 'cloud_name',
+            'apiSecret': 'api_secret'
+          };
+
+          Object.entries(casingMap).forEach(([backendKey, frontendKey]) => {
+            if (mergedCreds[backendKey] !== undefined && templateFields.includes(frontendKey)) {
+              mergedCreds[frontendKey] = mergedCreds[backendKey];
+              delete mergedCreds[backendKey];
+            }
+          });
+
+          // Ensure all template fields exist in state, even if empty
+          templateFields.forEach(field => {
+            if (mergedCreds[field] === undefined) {
+              mergedCreds[field] = '';
+            }
+          });
+          initialCredentials[providerKey] = mergedCreds as CredentialData;
         }
       });
       setCredentials(initialCredentials);
@@ -407,31 +444,51 @@ function APIIntegrations(): JSX.Element {
     setHasChanges({ ...hasChanges, [service]: true });
   }
 
-  const handleCreateIntegration = () => {
+  const handleCreateIntegration = async () => {
+    if (!newIntegration.name) return;
+    
     // Check if integration already exists
     const exists = credentialsData?.data?.some(cred => {
       const config = providerUIConfigs[cred.provider];
       return config && config.name.toLowerCase() === newIntegration.name.toLowerCase();
-    }) || Object.values(providerUIConfigs).some(config =>
-      config.name.toLowerCase() === newIntegration.name.toLowerCase() &&
-      credentialsData?.data?.some(cred => cred.provider === Object.keys(providerUIConfigs).find(key => providerUIConfigs[key as IntegrationProvider] === config))
-    );
+    });
 
     if (exists) {
       toast.error(`${newIntegration.name} Integration already exists!`);
       return;
     }
 
-    toast.success(`Integration "${newIntegration.name}" added successfully!`);
-    setIsModalOpen(false);
-    setNewIntegration({
-      name: '',
-      icon: '🔌',
-      color: '#3b82f6',
-      description: '',
-      keyLabel: 'API Key',
-      fields: '',
-    });
+    const provider = newIntegration.provider;
+    if (!provider) {
+      toast.error('Please select a provider template');
+      return;
+    }
+
+    try {
+      const response = await updateCredential({
+        provider,
+        body: {
+          credentials: newIntegrationCredentials,
+        },
+      }).unwrap();
+
+      toast.success(response.message || `Integration "${newIntegration.name}" added successfully!`);
+      setIsModalOpen(false);
+      setNewIntegration({
+        name: '',
+        icon: '🔌',
+        color: '#3b82f6',
+        description: '',
+        keyLabel: 'API Key',
+        fields: '',
+        provider: undefined,
+      });
+      setNewIntegrationCredentials({});
+      refetchCredentials();
+    } catch (error: any) {
+      toast.error(error?.data?.message || `Failed to add ${newIntegration.name} integration`);
+      console.error(error);
+    }
   };
 
   const selectTemplate = (template: IntegrationTemplate) => {
@@ -442,7 +499,20 @@ function APIIntegrations(): JSX.Element {
       description: template.description,
       keyLabel: template.keyLabel || 'API Key',
       fields: template.fields || '',
+      provider: template.provider,
     });
+    
+    // Initialize credentials for the new integration
+    const fields = template.fields?.split(',') || [];
+    const initialCreds: Record<string, string> = {};
+    const initialVisibility: Record<string, boolean> = {};
+    fields.forEach(f => {
+      const field = f.trim();
+      initialCreds[field] = '';
+      initialVisibility[field] = false;
+    });
+    setNewIntegrationCredentials(initialCreds);
+    setNewIntegrationPasswordVisibility(initialVisibility);
   };
 
   async function handleUpdateCredential(service: string): Promise<void> {
@@ -454,20 +524,33 @@ function APIIntegrations(): JSX.Element {
       return;
     }
 
+    // Filter out masked values to avoid sending "********" to the server
+    const filteredCredentials: Record<string, string> = {};
+    Object.entries(credentialData).forEach(([key, value]) => {
+      if (value && !String(value).includes('***')) {
+        filteredCredentials[key] = value;
+      }
+    });
+
+    if (Object.keys(filteredCredentials).length === 0) {
+      toast.error('No changes detected to rotate');
+      return;
+    }
+
     setCurrentProvider(service);
     try {
-      await updateCredential({
+      const response = await updateCredential({
         provider,
         body: {
-          credentials: credentialData as Record<string, string>,
+          credentials: filteredCredentials,
         },
       }).unwrap();
 
-      toast.success(`${service} integration settings saved successfully!`);
+      toast.success(response.message || `${service} integration settings saved successfully!`);
       setHasChanges({ ...hasChanges, [service]: false });
       refetchCredentials();
-    } catch (error) {
-      toast.error(`Failed to save ${service} integration settings`);
+    } catch (error: any) {
+      toast.error(error?.data?.message || `Failed to save ${service} integration settings`);
       console.error(error);
     } finally {
       setCurrentProvider(null);
@@ -626,7 +709,7 @@ function APIIntegrations(): JSX.Element {
             disabled={!hasChanges || isSaving}
             className="px-6 py-2 rounded-lg text-sm font-bold bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-500/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
           >
-            {isSaving ? 'Saving...' : '💾 Save Changes'}
+            {isSaving ? 'Saving...' : (status === 'Active' ? '🔄 Rotate Credentials' : '💾 Save Changes')}
           </button>
         </div>
       </div>
@@ -708,6 +791,13 @@ function APIIntegrations(): JSX.Element {
 
       {/* Integration Cards */}
       <div className="space-y-8 mb-10">
+        {credentialsData?.data?.length === 0 && !isLoadingCredentials && (
+          <div className="flex flex-col items-center justify-center py-20 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-3xl">
+            <div className="text-4xl mb-4">🔌</div>
+            <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">No Integrations Found</h3>
+            <p className="text-gray-500 dark:text-gray-400">Click "Add New Integration" to get started.</p>
+          </div>
+        )}
         {credentialsData?.data?.map((cred: IntegrationCredential) => {
           const config = providerUIConfigs[cred.provider];
           const providerType = cred.provider;
@@ -741,15 +831,24 @@ function APIIntegrations(): JSX.Element {
               hasChanges={hasChanges[providerKey]}
             >
               <div className="grid gap-2">
-                {cred.fieldNames.map((field) => (
-                  <PasswordField
-                    key={`${cred.provider}-${field}`}
-                    id={`${cred.provider}-${field}`}
-                    value={credentials[providerKey]?.[field] || ''}
-                    label={field.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
-                    onChange={(value) => handleCredentialChange(providerKey, field, value)}
-                  />
-                ))}
+                {(() => {
+                  const template = INTEGRATION_TEMPLATES.find(t => t.provider === cred.provider);
+                  const templateFields = template?.fields?.split(',').map(f => f.trim()) || [];
+                  
+                  // Strictly follow template fields if available to avoid extra/duplicate fields
+                  // If no template, fallback to backend fieldNames
+                  const allFields = templateFields.length > 0 ? templateFields : (cred.fieldNames || []);
+                  
+                  return allFields.map((field: string) => (
+                    <PasswordField
+                      key={`${cred.provider}-${field}`}
+                      id={`${cred.provider}-${field}`}
+                      value={credentials[providerKey]?.[field] || ''}
+                      label={field.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                      onChange={(value) => handleCredentialChange(providerKey, field, value)}
+                    />
+                  ));
+                })()}
 
 
                 {(() => {
@@ -867,17 +966,27 @@ function APIIntegrations(): JSX.Element {
                   Popular Integrations
                 </h3>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-5">
-                  {INTEGRATION_TEMPLATES.map((template) => (
-                    <button
-                      key={template.id}
-                      onClick={() => selectTemplate(template)}
-                      className="flex flex-col items-center p-6 rounded-2xl border border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800/20 hover:border-blue-500 hover:bg-blue-50/50 dark:hover:bg-blue-500/10 hover:shadow-xl hover:shadow-blue-500/5 transition-all group relative overflow-hidden"
-                    >
-                      <div className="text-4xl mb-4 group-hover:scale-110 transition-transform duration-300 z-10">{template.icon}</div>
-                      <div className="font-bold text-base text-gray-900 dark:text-white mb-1.5 z-10">{template.name}</div>
-                      <div className="text-[11px] font-medium text-gray-500 dark:text-gray-400 text-center leading-tight z-10">{template.description}</div>
-                    </button>
-                  ))}
+                  {(() => {
+                    const availableTemplates = INTEGRATION_TEMPLATES.filter(t => !credentialsData?.data?.some(c => c.provider === t.provider));
+                    if (availableTemplates.length === 0) {
+                      return (
+                        <div className="col-span-full py-8 text-center bg-gray-50 dark:bg-gray-900/30 rounded-2xl border border-dashed border-gray-200 dark:border-gray-700">
+                          <p className="text-sm text-gray-500 dark:text-gray-400">All popular integrations have been added.</p>
+                        </div>
+                      );
+                    }
+                    return availableTemplates.map((template) => (
+                      <button
+                        key={template.id}
+                        onClick={() => selectTemplate(template)}
+                        className="flex flex-col items-center p-6 rounded-2xl border border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800/20 hover:border-blue-500 hover:bg-blue-50/50 dark:hover:bg-blue-500/10 hover:shadow-xl hover:shadow-blue-500/5 transition-all group relative overflow-hidden"
+                      >
+                        <div className="text-4xl mb-4 group-hover:scale-110 transition-transform duration-300 z-10">{template.icon}</div>
+                        <div className="font-bold text-base text-gray-900 dark:text-white mb-1.5 z-10">{template.name}</div>
+                        <div className="text-[11px] font-medium text-gray-500 dark:text-gray-400 text-center leading-tight z-10">{template.description}</div>
+                      </button>
+                    ));
+                  })()}
                 </div>
               </div>
 
@@ -941,25 +1050,48 @@ function APIIntegrations(): JSX.Element {
                     />
                   </div>
 
-                  <div className="form-group flex flex-col md:flex-row gap-6">
-                    <div className="flex-1">
-                      <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2.5">API Key Label</label>
-                      <input
-                        type="text"
-                        className="w-full px-4.5 py-3.5 border border-gray-200 dark:border-gray-700 rounded-xl text-sm bg-gray-50 dark:bg-gray-900/50 text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 transition-all font-medium"
-                        value={newIntegration.keyLabel}
-                        onChange={(e) => setNewIntegration({ ...newIntegration, keyLabel: e.target.value })}
-                      />
-                    </div>
-                    <div className="flex-1">
-                      <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2.5">Additional Fields</label>
-                      <input
-                        type="text"
-                        className="w-full px-4.5 py-3.5 border border-gray-200 dark:border-gray-700 rounded-xl text-sm bg-gray-50 dark:bg-gray-900/50 text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 transition-all font-medium"
-                        placeholder="e.g., Account SID, Project ID"
-                        value={newIntegration.fields}
-                        onChange={(e) => setNewIntegration({ ...newIntegration, fields: e.target.value })}
-                      />
+                  <div className="form-group">
+                    <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-6 flex items-center gap-2">
+                      <span className="p-1.5 bg-blue-100 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 rounded-lg text-xs">🔑</span>
+                      Credential Fields
+                    </label>
+                    <div className="grid gap-6 p-6 bg-gray-50 dark:bg-gray-900/30 rounded-2xl border border-gray-100 dark:border-gray-800">
+                      {(newIntegration.fields ? newIntegration.fields.split(',') : []).map((field) => {
+                        const trimmedField = field.trim();
+                        if (!trimmedField) return null;
+                        return (
+                          <div key={trimmedField} className="form-group">
+                            <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 mb-2 uppercase tracking-wider">
+                              {trimmedField.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                              <span className="text-red-500 ml-1">*</span>
+                            </label>
+                            <div className="relative">
+                              <input
+                                type={newIntegrationPasswordVisibility[trimmedField] ? 'text' : 'password'}
+                                className="w-full px-4.5 py-3 border border-gray-200 dark:border-gray-700 rounded-xl text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 transition-all font-medium pr-12"
+                                placeholder={`Enter ${trimmedField.replace(/_/g, ' ')}`}
+                                value={newIntegrationCredentials[trimmedField] || ''}
+                                onChange={(e) => setNewIntegrationCredentials({ ...newIntegrationCredentials, [trimmedField]: e.target.value })}
+                              />
+                              <button
+                                type="button"
+                                onClick={() => setNewIntegrationPasswordVisibility({
+                                  ...newIntegrationPasswordVisibility,
+                                  [trimmedField]: !newIntegrationPasswordVisibility[trimmedField]
+                                })}
+                                className="absolute right-3 top-1/2 -translate-y-1/2 p-2 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 transition-colors"
+                              >
+                                {newIntegrationPasswordVisibility[trimmedField] ? '🙈' : '👁️'}
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      })}
+                      {!newIntegration.fields && (
+                        <div className="text-sm text-gray-500 dark:text-gray-400 italic text-center py-4">
+                          Select a template above to see required fields
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
