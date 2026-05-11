@@ -251,6 +251,7 @@ function APIIntegrations(): JSX.Element {
   const [revealModalOpen, setRevealModalOpen] = useState(false);
   const [revealTarget, setRevealTarget] = useState<{ provider: string, fieldId: string } | null>(null);
   const [adminPassword, setAdminPassword] = useState('');
+  const [showAdminPassword, setShowAdminPassword] = useState(false);
 
 
 
@@ -314,6 +315,7 @@ function APIIntegrations(): JSX.Element {
       setRevealModalOpen(false);
       setAdminPassword('');
       setRevealTarget(null);
+      setShowAdminPassword(false);
     } catch (error: any) {
       toast.error(error?.data?.message || 'Failed to reveal credentials. Incorrect password?');
     }
@@ -781,7 +783,7 @@ function APIIntegrations(): JSX.Element {
                 🔐 Security Verification
               </h2>
               <button
-                onClick={() => { setRevealModalOpen(false); setAdminPassword(''); }}
+                onClick={() => { setRevealModalOpen(false); setAdminPassword(''); setShowAdminPassword(false); }}
                 className="text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 transition-colors p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -795,19 +797,28 @@ function APIIntegrations(): JSX.Element {
               </p>
               <div className="mb-6">
                 <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2.5">Admin Password</label>
-                <input
-                  type="password"
-                  className="w-full px-4.5 py-3 border border-gray-200 dark:border-gray-700 rounded-xl text-sm bg-gray-50 dark:bg-gray-900/50 text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 transition-all"
-                  value={adminPassword}
-                  onChange={(e) => setAdminPassword(e.target.value)}
-                  placeholder="Enter your password"
-                  autoFocus
-                  onKeyDown={(e) => { if (e.key === 'Enter') handleRevealSubmit(); }}
-                />
+                <div className="relative">
+                  <input
+                    type={showAdminPassword ? 'text' : 'password'}
+                    className="w-full px-4.5 py-3 border border-gray-200 dark:border-gray-700 rounded-xl text-sm bg-gray-50 dark:bg-gray-900/50 text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 transition-all pr-12"
+                    value={adminPassword}
+                    onChange={(e) => setAdminPassword(e.target.value)}
+                    placeholder="Enter your password"
+                    autoFocus
+                    onKeyDown={(e) => { if (e.key === 'Enter') handleRevealSubmit(); }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowAdminPassword(!showAdminPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 p-2 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 transition-colors"
+                  >
+                    {showAdminPassword ? '🙈' : '👁️'}
+                  </button>
+                </div>
               </div>
               <div className="flex justify-end gap-3 pt-2">
                 <button
-                  onClick={() => { setRevealModalOpen(false); setAdminPassword(''); }}
+                  onClick={() => { setRevealModalOpen(false); setAdminPassword(''); setShowAdminPassword(false); }}
                   className="px-6 py-2.5 rounded-xl font-bold text-sm text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700 transition-all"
                 >
                   Cancel
