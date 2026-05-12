@@ -85,6 +85,9 @@ export interface LessonFormState {
   avoidDuplicates: boolean;
   sectionTotal: number;
   taskTime: number;
+  targetLanguage: string;
+  nativeLanguage: string;
+  generationSeed: string;
   // level_title?: string;
   // topic?: string;
   // is_pro?: boolean;
@@ -123,6 +126,7 @@ export interface LessonRequestPayload {
   TASK_TIME: number;
   NATIVE_LANGUAGE: string;
   TEST_MODE: 'ON' | 'OFF';
+  GENERATION_SEED: string;
   LESSON_TITLE: string;
   // level_title?: string;
   // topic?: string;

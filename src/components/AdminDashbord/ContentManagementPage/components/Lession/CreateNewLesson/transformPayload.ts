@@ -217,15 +217,16 @@ export function transformFormToPayload(
   const payload: LessonRequestPayload = {
     provider: PROVIDER_MAP[selectedProvider],
     LEVEL_ID: selectedLevel,
-    TARGET_LANGUAGE: opts.targetLanguage,
+    TARGET_LANGUAGE: formState.targetLanguage || opts.targetLanguage,
     SKILL: SKILL_MAP[selectedTask],
     TASK_ID: selectedTaskId,
     DOMAIN: DOMAIN_MAP[selectedDomain],
     DIFFICULTY: DIFFICULTY_MAP[selectedDifficulty],
-    SECTION_TOTAL: sectionTotal * 60,
-    TASK_TIME: taskTime * 60,
-    NATIVE_LANGUAGE: opts.nativeLanguage,
+    SECTION_TOTAL: sectionTotal,
+    TASK_TIME: taskTime,
+    NATIVE_LANGUAGE: formState.nativeLanguage || opts.nativeLanguage,
     TEST_MODE: 'OFF',
+    GENERATION_SEED: formState.generationSeed || '42',
     LESSON_TITLE: lessonTitle.trim() || 'Auto',
   };
 

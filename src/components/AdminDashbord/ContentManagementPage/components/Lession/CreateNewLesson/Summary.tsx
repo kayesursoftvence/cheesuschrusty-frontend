@@ -24,7 +24,10 @@ const Summary: React.FC<SummaryProps> = ({ formState, onBack, onSubmit }) => {
     selectedProvider,
     lessonTitle,
     batchCount,
-    avoidDuplicates } = formState;
+    avoidDuplicates,
+    targetLanguage,
+    nativeLanguage,
+    generationSeed } = formState;
 
   // Derive labels
   const taskLabel = useMemo(() => {
@@ -105,20 +108,32 @@ const Summary: React.FC<SummaryProps> = ({ formState, onBack, onSubmit }) => {
           value={domainLabel}
           isComplete={!!selectedDomain}
         />
-        {/* <ConfigSummaryItem
+        <ConfigSummaryItem
           icon="🎓"
           label="Difficulty Level"
           value={selectedDifficulty ? selectedDifficulty.charAt(0).toUpperCase() + selectedDifficulty.slice(1) : 'Not selected'}
           isPlaceholder={!selectedDifficulty}
           isComplete={!!selectedDifficulty}
-        /> */}
-        {/* <ConfigSummaryItem
+        />
+        <ConfigSummaryItem
           icon="⏱️"
           label="Time & Length"
-          value={sectionTotal && taskTime ? `${sectionTotal} min total / ${taskTime} min task` : 'Not complete'}
+          value={sectionTotal && taskTime ? `${sectionTotal} items / ${taskTime} min task` : 'Not complete'}
           isPlaceholder={!sectionTotal || !taskTime}
           isComplete={sectionTotal > 0 && taskTime > 0}
-        /> */}
+        />
+        <ConfigSummaryItem
+          icon="🌐"
+          label="Languages"
+          value={`${targetLanguage} (Target) / ${nativeLanguage} (Native)`}
+          isComplete={true}
+        />
+        <ConfigSummaryItem
+          icon="🎲"
+          label="Generation Seed"
+          value={formState.generationSeed}
+          isComplete={true}
+        />
         <ConfigSummaryItem
           icon="⚙️"
           label="Generation Mode"

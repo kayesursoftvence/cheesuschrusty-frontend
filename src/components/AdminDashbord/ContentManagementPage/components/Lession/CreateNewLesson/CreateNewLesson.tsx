@@ -58,18 +58,15 @@ const CreateNewLesson: React.FC = () => {
   const [selectedTask, setSelectedTask] = useState<TaskType>(null);
   const [selectedTaskId, setSelectedTaskId] = useState<TaskIdType>(null);
   const [selectedDomain, setSelectedDomain] = useState<Domain>('random');
-  const [selectedDifficulty,
-    //  setSelectedDifficulty
-    ] = useState<DifficultyLevel | null>('medium');
-  const [sectionTotal, 
-    // setSectionTotal
-  ] = useState(5);
-  const [taskTime, 
-    // setTaskTime
-  ] = useState(10);
+  const [selectedDifficulty, setSelectedDifficulty] = useState<DifficultyLevel | null>('medium');
+  const [sectionTotal, setSectionTotal] = useState(5);
+  const [taskTime, setTaskTime] = useState(10);
   const [generationMode, setGenerationMode] = useState<GenerationMode>('single');
   const [selectedProvider, setSelectedProvider] = useState<AIProvider>('openai');
   const [lessonTitle, setLessonTitle] = useState('');
+  const [targetLanguage, setTargetLanguage] = useState('English');
+  const [nativeLanguage, setNativeLanguage] = useState('Bengali');
+  const [generationSeed, setGenerationSeed] = useState('42');
   const [batchCount, setBatchCount] = useState(5);
   const [avoidDuplicates, setAvoidDuplicates] = useState(true);
 
@@ -128,6 +125,9 @@ const CreateNewLesson: React.FC = () => {
     lessonTitle,
     batchCount,
     avoidDuplicates,
+    targetLanguage,
+    nativeLanguage,
+    generationSeed,
   };
 
   // ── Navigation ──────────────────────────────────────────────
@@ -368,19 +368,13 @@ const CreateNewLesson: React.FC = () => {
 
       if (generationMode === 'batch') {
         // ── Batch mode ──────────────────────────────────────
-        const batchPayload = transformFormToBatchPayload(formState, {
-          targetLanguage: 'Italian',
-          nativeLanguage: 'English',
-        });
+        const batchPayload = transformFormToBatchPayload(formState);
 
         console.log('Batch payload:', batchPayload);
         await executeBatchRequests(batchPayload);
       } else {
         // ── Single mode ─────────────────────────────────────
-        const payload: LessonRequestPayload = transformFormToPayload(formState, {
-          targetLanguage: 'Italian',
-          nativeLanguage: 'English',
-        });
+        const payload: LessonRequestPayload = transformFormToPayload(formState);
 
         console.log('Submitting payload:', payload);
         await executeSingleRequest(payload);
@@ -470,39 +464,45 @@ const CreateNewLesson: React.FC = () => {
             onBack={goToBack}
           />
         );
-      // case 'difficulty':
-      //   return (
-      //     <DifficultySelection
-      //       selectedDifficulty={selectedDifficulty}
-      //       onDifficultyChange={setSelectedDifficulty}
-      //       onNext={goToNext}
-      //       onBack={goToBack}
-      //       currentStep={3}
-      //       totalSteps={7}
-      //     />
-      //   );
-      // case 'time-config':
-      //   return (
-      //     <TimeSelection
-      //       sectionTotal={sectionTotal}
-      //       taskTime={taskTime}
-      //       onSectionTotalChange={setSectionTotal}
-      //       onTaskTimeChange={setTaskTime}
-      //       onNext={goToNext}
-      //       onBack={goToBack}
-      //       currentStep={4}
-      //       totalSteps={7}
-      //     />
-      //   );
+      case 'difficulty':
+        return (
+          <DifficultySelection
+            selectedDifficulty={selectedDifficulty}
+            onDifficultyChange={setSelectedDifficulty}
+            onNext={goToNext}
+            onBack={goToBack}
+            currentStep={3}
+            totalSteps={7}
+          />
+        );
+      case 'time-config':
+        return (
+          <TimeSelection
+            sectionTotal={sectionTotal}
+            taskTime={taskTime}
+            onSectionTotalChange={setSectionTotal}
+            onTaskTimeChange={setTaskTime}
+            onNext={goToNext}
+            onBack={goToBack}
+            currentStep={4}
+            totalSteps={7}
+          />
+        );
       case 'generation-mode':
         return (
           <GenerationModeSelection
             generationMode={generationMode}
             lessonTitle={lessonTitle}
+            targetLanguage={targetLanguage}
+            nativeLanguage={nativeLanguage}
+            generationSeed={generationSeed}
             batchCount={batchCount}
             avoidDuplicates={avoidDuplicates}
             onModeChange={setGenerationMode}
             onTitleChange={setLessonTitle}
+            onTargetLanguageChange={setTargetLanguage}
+            onNativeLanguageChange={setNativeLanguage}
+            onGenerationSeedChange={setGenerationSeed}
             onBatchCountChange={setBatchCount}
             onAvoidDuplicatesChange={setAvoidDuplicates}
             onNext={goToNext}

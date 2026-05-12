@@ -8,10 +8,16 @@ import StepNavigation from './StepNavigation';
 interface GenerationModeSelectionProps {
   generationMode: GenerationMode;
   lessonTitle: string;
+  targetLanguage: string;
+  nativeLanguage: string;
+  generationSeed: string;
   batchCount: number;
   avoidDuplicates: boolean;
   onModeChange: (mode: GenerationMode) => void;
   onTitleChange: (title: string) => void;
+  onTargetLanguageChange: (lang: string) => void;
+  onNativeLanguageChange: (lang: string) => void;
+  onGenerationSeedChange: (seed: string) => void;
   onBatchCountChange: (count: number) => void;
   onAvoidDuplicatesChange: (avoid: boolean) => void;
   onNext: () => void;
@@ -23,10 +29,16 @@ interface GenerationModeSelectionProps {
 const GenerationModeSelection: React.FC<GenerationModeSelectionProps> = ({
   generationMode,
   lessonTitle,
+  targetLanguage,
+  nativeLanguage,
+  generationSeed,
   batchCount,
   avoidDuplicates,
   onModeChange,
   onTitleChange,
+  onTargetLanguageChange,
+  onNativeLanguageChange,
+  onGenerationSeedChange,
   onBatchCountChange,
   onAvoidDuplicatesChange,
   onNext,
@@ -37,7 +49,9 @@ const GenerationModeSelection: React.FC<GenerationModeSelectionProps> = ({
   const [showValidation, setShowValidation] = useState(false);
 
   const canProceed =
-    generationMode === 'batch' || (generationMode === 'single' && lessonTitle.trim().length > 0);
+    (generationMode === 'batch' || (generationMode === 'single' && lessonTitle.trim().length > 0)) &&
+    targetLanguage.trim().length > 0 &&
+    nativeLanguage.trim().length > 0;
 
   const handleNext = () => {
     if (!canProceed) {
@@ -50,12 +64,12 @@ const GenerationModeSelection: React.FC<GenerationModeSelectionProps> = ({
   return (
     <div>
       <Card
-        title="Generation Mode"
-        description="Create a single lesson or generate multiple variants"
+        title="Generation Mode & Configuration"
+        description="Configure lesson details, languages, and generation settings"
         status={canProceed ? 'completed' : 'required'}
       >
         {/* Mode Selector */}
-        <div className="grid gap-3">
+        <div className="grid gap-3 mb-8">
           {MODE_OPTIONS.map((mode) => {
             const isActive = generationMode === mode.value;
             return (
@@ -93,84 +107,99 @@ const GenerationModeSelection: React.FC<GenerationModeSelectionProps> = ({
           })}
         </div>
 
-        {/* Single Mode Fields */}
-        {generationMode === 'single' && (
-          <div className="mt-6">
-            <div className="mb-5">
+        {/* Configuration Fields */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Left Column: Languages and Seed */}
+          <div className="space-y-5">
+            <div>
               <label className="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2">
-                Lesson Title <span className="text-red-500">*</span>
+                Target Language <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                placeholder="e.g., English, Italian"
+                value={targetLanguage}
+                onChange={(e) => onTargetLanguageChange(e.target.value)}
+                className="w-full px-3.5 py-2.5 border border-gray-200 dark:border-gray-600 rounded-lg text-sm transition-all bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                Native Language <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                placeholder="e.g., Bengali, English"
+                value={nativeLanguage}
+                onChange={(e) => onNativeLanguageChange(e.target.value)}
+                className="w-full px-3.5 py-2.5 border border-gray-200 dark:border-gray-600 rounded-lg text-sm transition-all bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                Generation Seed
                 <span className="block text-xs text-gray-500 dark:text-gray-400 mt-1 font-normal">
-                  This will be displayed to students and instructors
+                  Consistent seed for reproducible generations
                 </span>
               </label>
               <input
                 type="text"
-                placeholder="e.g., B1c Listening: Healthcare Appointment Scheduling"
-                value={lessonTitle}
-                onChange={(e) => {
-                  onTitleChange(e.target.value);
-                  setShowValidation(false);
-                }}
-                className="w-full px-3.5 py-2.5 border border-gray-200 dark:border-gray-600 rounded-lg text-sm font-sans transition-all duration-200 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-blue-500 focus:ring-[3px] focus:ring-blue-500/10"
+                placeholder="e.g., 42"
+                value={generationSeed}
+                onChange={(e) => onGenerationSeedChange(e.target.value)}
+                className="w-full px-3.5 py-2.5 border border-gray-200 dark:border-gray-600 rounded-lg text-sm transition-all bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10"
               />
             </div>
           </div>
-        )}
 
-        {/* Batch Mode Fields */}
-        {generationMode === 'batch' && (
-          <div className="mt-6">
-            <div className="mb-5">
-              <label className="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2">
-                Number of Variants <span className="text-red-500">*</span>
-                <span className="block text-xs text-gray-500 dark:text-gray-400 mt-1 font-normal">
-                  How many unique versions should be generated?
-                </span>
-              </label>
-              <input
-                type="number"
-                placeholder="e.g., 10"
-                value={batchCount}
-                onChange={(e) => onBatchCountChange(Number(e.target.value))}
-                min={1}
-                max={50}
-                className="w-full px-3.5 py-2.5 border border-gray-200 dark:border-gray-600 rounded-lg text-sm font-sans transition-all duration-200 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-blue-500 focus:ring-[3px] focus:ring-blue-500/10"
-              />
-            </div>
-
-            <div className="mt-4 p-5 bg-gradient-to-br from-sky-50 to-sky-100 dark:from-sky-900/30 dark:to-sky-800/20 border border-sky-200 dark:border-sky-700 rounded-xl">
-              <div className="flex items-center gap-2 text-[15px] mb-3 text-gray-900 dark:text-gray-100">
-                <span>🎲</span>
-                <strong>Auto-Generated Titles</strong>
+          {/* Right Column: Mode-specific fields */}
+          <div className="space-y-5">
+            {generationMode === 'single' ? (
+              <div>
+                <label className="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                  Lesson Title <span className="text-red-500">*</span>
+                  <span className="block text-xs text-gray-500 dark:text-gray-400 mt-1 font-normal">
+                    Display title for students
+                  </span>
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g., A Trip to London"
+                  value={lessonTitle}
+                  onChange={(e) => onTitleChange(e.target.value)}
+                  className="w-full px-3.5 py-2.5 border border-gray-200 dark:border-gray-600 rounded-lg text-sm transition-all bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10"
+                />
               </div>
-              <div className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
-                Each variant will automatically receive a unique title based on:{' '}
-                <strong className="text-gray-900 dark:text-gray-100">
-                  Domain + Task ID + UUID
-                </strong>
-                <br />
-                <br />
-                Example:{' '}
-                <code className="bg-blue-500/10 dark:bg-blue-400/15 px-2 py-0.5 rounded font-mono text-[13px] text-blue-500 dark:text-blue-400">
-                  Health-L01-a7b3c9d2
-                </code>
-                <br />
-                <br />
-                Students will receive a random variant from the pool to ensure practice diversity.
-              </div>
-            </div>
-
-            <label className="flex items-center gap-2.5 text-sm text-gray-900 dark:text-gray-100 cursor-pointer mt-4">
-              <input
-                type="checkbox"
-                checked={avoidDuplicates}
-                onChange={(e) => onAvoidDuplicatesChange(e.target.checked)}
-                className="w-[18px] h-[18px] cursor-pointer accent-blue-500"
-              />
-              <span>Prevent users from receiving duplicate variants</span>
-            </label>
+            ) : (
+              <>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                    Number of Variants <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="number"
+                    value={batchCount}
+                    onChange={(e) => onBatchCountChange(Number(e.target.value))}
+                    min={1}
+                    max={50}
+                    className="w-full px-3.5 py-2.5 border border-gray-200 dark:border-gray-600 rounded-lg text-sm transition-all bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10"
+                  />
+                </div>
+                <label className="flex items-center gap-2.5 text-sm text-gray-900 dark:text-gray-100 cursor-pointer pt-2">
+                  <input
+                    type="checkbox"
+                    checked={avoidDuplicates}
+                    onChange={(e) => onAvoidDuplicatesChange(e.target.checked)}
+                    className="w-[18px] h-[18px] cursor-pointer accent-blue-500"
+                  />
+                  <span>Prevent duplicate variants</span>
+                </label>
+              </>
+            )}
           </div>
-        )}
+        </div>
 
         <StepNavigation
           currentStep={currentStep}
@@ -179,11 +208,7 @@ const GenerationModeSelection: React.FC<GenerationModeSelectionProps> = ({
           onBack={onBack}
           onNext={handleNext}
           showValidation={showValidation && !canProceed}
-          validationMessage={
-            generationMode === 'single'
-              ? 'Please enter a lesson title to continue'
-              : undefined
-          }
+          validationMessage="Please complete all required fields (*) to continue"
         />
       </Card>
     </div>

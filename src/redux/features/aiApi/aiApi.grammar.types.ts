@@ -26,6 +26,7 @@ export interface GenerateGrammarRequest {
   TASK_TIME: number;          // in seconds
   NATIVE_LANGUAGE: string;    // e.g. "Bengali"
   TEST_MODE: TestMode;
+  GENERATION_SEED: string;
   LESSON_TITLE: string;
 }
 
