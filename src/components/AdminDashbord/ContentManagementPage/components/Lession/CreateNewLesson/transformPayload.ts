@@ -105,6 +105,7 @@ const DOMAIN_MAP: Record<Domain, string> = {
 const PROVIDER_MAP: Record<AIProvider, string> = {
   openai: 'openai',
   grok: 'grok',
+  openrouter: 'openrouter',
 };
 
 // ══════════════════════════════════════════════════════════════

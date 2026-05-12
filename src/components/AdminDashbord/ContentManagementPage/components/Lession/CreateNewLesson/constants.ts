@@ -82,6 +82,13 @@ export const MODE_OPTIONS: ModeOption[] = [
 
 export const PROVIDER_OPTIONS: ProviderOption[] = [
   {
+    value: 'grok',
+    icon: '⚡',
+    name: 'Grok 3 (xAI)',
+    description:
+      'Specialized in civic-themed content, perfect for citizenship preparation.',
+  },
+  {
     value: 'openai',
     icon: '🤖',
     name: 'OpenAI (GPT-4)',
@@ -89,11 +96,11 @@ export const PROVIDER_OPTIONS: ProviderOption[] = [
       'Advanced language model ideal for generating rich dialogues and realistic scenarios.',
   },
   {
-    value: 'grok',
-    icon: '⚡',
-    name: 'Grok (xAI)',
+    value: 'openrouter',
+    icon: '🌐',
+    name: 'OpenRouter',
     description:
-      'Specialized in civic-themed content, perfect for citizenship preparation.',
+      'Unified gateway to multiple LLMs. Default route: OpenRouter → Grok 3.',
   },
 ];
 

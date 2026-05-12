@@ -20,7 +20,7 @@ export type DifficultyLevel = 'easy' | 'medium' | 'hard';
 export type TaskType = 'listening' | 'reading' | 'writing' | 'speaking' | 'grammar' | null;
 export type Domain = 'health' | 'education' | 'work' | 'housing' | 'bureaucracy' | 'commerce' | 'random';
 export type GenerationMode = 'single' | 'batch';
-export type AIProvider = 'openai' | 'grok';
+export type AIProvider = 'openai' | 'grok' | 'openrouter';
 
 // ── Level Options ───────────────────────────────────────────
 export interface LevelOption {
