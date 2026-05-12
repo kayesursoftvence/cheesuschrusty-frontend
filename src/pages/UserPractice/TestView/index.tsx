@@ -58,16 +58,46 @@ export default function TestView(): JSX.Element {
 
   console.log("RTK Query Raw Data (data):", data);
   console.log("LessonId:", lessonId);
+
+  // Derive layout logically from various possible fields
+  const rawTaskType = 
+    data?.data?.content?.calibration_metrics?.task_type || 
+    data?.data?.content?.metadata?.task_type || 
+    data?.data?.content?.teacher_pack?.scoring?.task_type || 
+    "UNDEFINED";
+
+  // Simple normalization to supported LayoutTypes
+  let normalizedLayout: LayoutType = "MCQ";
+  const upperTaskType = rawTaskType.toUpperCase();
+  
+  if (upperTaskType.includes("MCQ")) normalizedLayout = "MCQ";
+  else if (upperTaskType.includes("MATCHING")) normalizedLayout = "MATCHING";
+  else if (upperTaskType.includes("TRUE_FALSE") || upperTaskType.includes("TRUEFALSE")) normalizedLayout = "TRUEFALSE";
+  else if (upperTaskType.includes("GAP_FILL") || upperTaskType.includes("GAPFILL")) normalizedLayout = "GAP_FILL";
+  else if (upperTaskType.includes("TRANSFORMATION")) normalizedLayout = "TRANSFORMATION";
+  else if (upperTaskType.includes("ERROR")) normalizedLayout = "ERROR_RECOGNITION";
+  else if (upperTaskType.includes("WRITING")) normalizedLayout = "WRITING";
+  else if (upperTaskType.includes("SPEAKING")) normalizedLayout = "SPEAKING";
+  else normalizedLayout = upperTaskType as LayoutType;
+
+  const layout = normalizedLayout;
+
   //   const state = SAMPLE_STATE;
   const state: TestState = SAMPLE_STATES[activeTaskId];
   const [writingText, setWritingText] = useState(state.writingText);
-  const layout = `${data?.data?.content?.calibration_metrics?.task_type}`.toUpperCase() as LayoutType;
 
   // Timer Control State
   const [isTimerRunning, setIsTimerRunning] = useState(skill?.toLowerCase() !== 'listening');
   const [startTime] = useState(Date.now());
   const isRunning = isTimerRunning;
-  const reaminingTime = data?.data?.content?.header?.section_total || (state?.type?.time?.[state?.mode] || 0) * 60 || 30;
+  
+  // Extract time with multiple fallbacks
+  const reaminingTime = 
+    data?.data?.content?.metadata?.timer || 
+    data?.data?.content?.metadata?.section_total || 
+    data?.data?.content?.header?.section_total || 
+    (state?.type?.time?.[state?.mode] || 0) * 60 || 
+    30;
 
   const config: TaskTypeConfig =
     state.type.configs[state.mode] || state.type.configs['STANDARD'] || {};

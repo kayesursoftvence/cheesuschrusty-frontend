@@ -8,6 +8,7 @@ import DomainSelection from './DomainSelection';
 import GenerationModeSelection from './GenerationModeSelection';
 import AIProviderSelection from './AIProviderSelection';
 import Summary from './Summary';
+import LessonPreview from './LessonPreview';
 import { useWizardNavigation } from './useWizardNavigation';
 import {
   useGenerateWritingMutation,
@@ -69,6 +70,7 @@ const CreateNewLesson: React.FC = () => {
   const [generationSeed, setGenerationSeed] = useState('42');
   const [batchCount, setBatchCount] = useState(5);
   const [avoidDuplicates, setAvoidDuplicates] = useState(true);
+  const [generatedResult, setGeneratedResult] = useState<any>(null);
 
   // ── Submission state ────────────────────────────────────────
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -230,6 +232,7 @@ const CreateNewLesson: React.FC = () => {
 
 
     console.log('Single lesson generated (AI):', result);
+    setGeneratedResult(result);
     console.log('Lesson record created:', createLessonResult);
 
     // Extract the lesson id from the createLesson response
@@ -409,6 +412,7 @@ const CreateNewLesson: React.FC = () => {
     setBatchCount(5);
     setAvoidDuplicates(true);
     setSubmitSuccess(false);
+    setGeneratedResult(null);
     setSubmitError(null);
     goToStep(1);
   };
@@ -555,7 +559,14 @@ const CreateNewLesson: React.FC = () => {
     return (
       <section className="block w-full">
         <div className="w-full mx-auto mt-12 w-full">
-          <LessonCreationSuccess onReset={resetForm} />
+          {generationMode === 'single' && generatedResult ? (
+            <LessonPreview 
+              result={generatedResult} 
+              onReset={resetForm} 
+            />
+          ) : (
+            <LessonCreationSuccess onReset={resetForm} />
+          )}
         </div>
       </section>
     );

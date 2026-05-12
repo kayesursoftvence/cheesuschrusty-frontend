@@ -159,8 +159,9 @@ export default function Feedback(): JSX.Element {
     if (evaluationResult && !lessonMarkedComplete && lessonId) {
       const scoring = evaluationResult?.feedback?.scoring;
       const xp = evaluationResult?.feedback?.xp;
-      const accuracy = scoring?.final_score || 0;
-      const xpEarned = (xp?.total_xp && xp.total_xp > 0) ? xp.total_xp : 1;
+      const rawAccuracy = scoring?.final_score;
+      const accuracy = Math.max(Number(rawAccuracy) || 0, 0.01);
+      const xpEarned = Number(xp?.total_xp) > 0 ? Number(xp.total_xp) : 1;
       const durationSeconds = parseInt(timeSpent, 10) || 0;
 
       completeLesson({

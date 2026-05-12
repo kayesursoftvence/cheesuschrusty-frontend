@@ -60,7 +60,7 @@ export function normalizePerformanceData(data: any): NormalizedFeedback | null {
     // 1. Identify where the core feedback object is
     // Case A: data.feedback_card (Flat or with sections)
     // Case B: data.feedback (Flat)
-    let root = data.feedback_card || data.feedback;
+    let root = data?.feedback_card || data?.feedback || {};
     
     // If root.content exists (Case: Nested content), drill down
     if (root?.content) {
@@ -70,8 +70,8 @@ export function normalizePerformanceData(data: any): NormalizedFeedback | null {
     // 2. Normalize Sections (Strengths/Improvements)
     // They can be direct properties or inside 'sections'
     // They can be array of strings (points) or array of objects (items)
-    const sourceStrengths = root.sections?.strengths || root.strengths;
-    const sourceImprovements = root.sections?.improvements || root.improvements;
+    const sourceStrengths = root?.sections?.strengths || root?.strengths;
+    const sourceImprovements = root?.sections?.improvements || root?.improvements;
 
     const normalizePoints = (source: any): string[] => {
         if (!source) return [];
@@ -140,10 +140,10 @@ export function normalizePerformanceData(data: any): NormalizedFeedback | null {
         domain: h?.domain
     });
 
-    const header = normalizeHeader(data.header || root.header);
+    const header = normalizeHeader(data.header || root?.header);
 
     // 4. Normalize Score
-    const sourceScore = root.sections?.score || root.score || {};
+    const sourceScore = root?.sections?.score || root?.score || {};
     const score = {
         title: sourceScore.title || "Score",
         value: sourceScore.value || "0 / 100",
@@ -151,7 +151,7 @@ export function normalizePerformanceData(data: any): NormalizedFeedback | null {
     };
 
     // 5. Normalize CEFR
-    const sourceCefr = root.sections?.cefr_profile || root.cefr_profile || {};
+    const sourceCefr = root?.sections?.cefr_profile || root?.cefr_profile || {};
     // Sometimes details are direct properties of cefr_profile, sometimes in 'ratings' or 'details'
     const cefrDetails = sourceCefr.details || sourceCefr.ratings || sourceCefr;
     const cefr = {
@@ -166,7 +166,7 @@ export function normalizePerformanceData(data: any): NormalizedFeedback | null {
     };
 
     // 6. Normalize Readiness
-    const sourceReadiness = root.sections?.readiness || root.readiness;
+    const sourceReadiness = root?.sections?.readiness || root?.readiness;
     const readiness = sourceReadiness ? {
         title: sourceReadiness.title || "Readiness",
         percentage: sourceReadiness.percentage || sourceReadiness.value || "0%",
@@ -174,7 +174,7 @@ export function normalizePerformanceData(data: any): NormalizedFeedback | null {
     } : null;
 
     // 7. Normalize Power Tip
-    const sourceTip = root.sections?.power_tip || root.power_tip;
+    const sourceTip = root?.sections?.power_tip || root?.power_tip;
     const power_tip = sourceTip ? {
         title: sourceTip.title || "Power Tip",
         explanation: sourceTip.explanation || sourceTip.tip || "",
@@ -182,7 +182,7 @@ export function normalizePerformanceData(data: any): NormalizedFeedback | null {
     } : null;
 
     // 8. Normalize Motivational Close
-    const sourceClose = root.sections?.motivational_close || root.motivational_close;
+    const sourceClose = root?.sections?.motivational_close || root?.motivational_close;
     // Handle nested message object scenario (Format 3)
     let motivational_close = null;
     if (sourceClose) {

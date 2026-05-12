@@ -45,7 +45,10 @@ const LAYOUT_MAP: Record<LayoutType, React.ComponentType<any>> = {
   ERROR_RECOGNITION: ErrorRecognitionLayout,
   WRITING: WritingLayout,
   SPEAKING: SpeakingLayout,
-  SPEAKING_90S: SpeakingLayout
+  SPEAKING_90S: SpeakingLayout,
+  MCQ_SENTENCE_COMPLETION: MCQLayout,
+  MCQ_MULTIPLE_CHOICE: MCQLayout,
+  READING_COMPREHENSION_MCQ: MCQLayout,
 };
 
 export default function LayoutRenderer({

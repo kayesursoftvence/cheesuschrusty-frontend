@@ -29,57 +29,73 @@ export function normalizeMCQPractice(res: any): MCQPractice | null {
 
   console.log("Normalizing MCQ res:", res);
 
-  let c = res.data?.content || res.data || res;
+  const data = res.data || res;
+  const content = data.content || data;
+  const studentHandout = content.student_handout || content;
+  const teacherPack = content.teacher_pack || content;
+  const metadata = content.metadata || header || {};
+  const header = content.header || data.header || {};
 
-  if (res.data?.questionSets && res.data.questionSets[0]?.content) {
-    c = res.data.questionSets[0].content;
-  } else if (!c.instructions && !c.questions && !c.student_handout) {
-    if (res.data?.data?.content) {
-      c = res.data.data.content;
-    } else if (res.data?.data) {
-      c = res.data.data;
-    } else if (res.content) {
-      c = res.content;
-    }
-  }
-
-  if (!c || (!c.instructions && !c.questions && !c.student_handout)) {
+  if (!content || (!content.instructions && !content.questions && !studentHandout.questions)) {
     console.warn("Could not find standard MCQ structure in:", res);
     return null;
   }
 
-  const studentHandout = c.student_handout || c;
-  const teacherPack = c.teacher_pack || c;
-  const header = c.header || res.header || {};
-  
-  const answerKey = teacherPack.key?.answer_key || {};
+  // Normalize Answers
+  const answerKey = teacherPack.answer_key || teacherPack.key?.answer_key || {};
   const answers: Record<string, string> = {};
 
   Object.entries(answerKey).forEach(([id, v]: any) => {
-    answers[id] = v.answer || "";
+    // Handle both {answer: "A"} and just "A"
+    answers[id] = typeof v === 'object' ? v.answer : v;
   });
 
-  const questions = (studentHandout.questions || c.questions || []).map((q: any) => ({
-    id: q.id,
-    text: q.text,
-    type: (q.type || "MCQ").toUpperCase(),
-    options: q.options || []
-  }));
+  // Normalize Questions
+  const questions = (studentHandout.questions || content.questions || []).map((q: any, idx: number) => {
+    const qId = q.id || q.number || String(idx + 1);
+    const qText = q.prompt || q.text || q.question || "";
+    
+    // Normalize Options from Record<string, string> to {id, text}[]
+    let normalizedOptions = [];
+    if (Array.isArray(q.options)) {
+      normalizedOptions = q.options.map((opt: any, optIdx: number) => {
+        if (typeof opt === 'string') return { id: String.fromCharCode(65 + optIdx), text: opt };
+        return { id: opt.id || opt.key || String.fromCharCode(65 + optIdx), text: opt.text || opt.label || "" };
+      });
+    } else if (typeof q.options === 'object') {
+      normalizedOptions = Object.entries(q.options).map(([key, val]: [string, any]) => ({
+        id: key,
+        text: val
+      }));
+    }
+
+    return {
+      id: qId,
+      text: qText,
+      type: (q.type || "MCQ").toUpperCase(),
+      options: normalizedOptions
+    };
+  });
+
+  // Normalize Stimulus
+  const stimulusRaw = studentHandout.stimulus || content.stimulus || "";
+  const stimulusText = typeof stimulusRaw === 'string' ? stimulusRaw : stimulusRaw.text || "";
+  const stimulusTitle = typeof stimulusRaw === 'object' ? stimulusRaw.title : "";
 
   return {
     header: {
-      level: header.level || "",
-      skill: header.skill || "",
-      topic: header.topic || "",
-      domain: header.domain || "",
-      taskId: header.task_id || "M-01",
-      provider: header.provider || ""
+      level: metadata.level || header.level || "",
+      skill: metadata.skill || header.skill || "",
+      topic: metadata.topic || header.topic || "",
+      domain: metadata.domain || header.domain || "",
+      taskId: metadata.task_id || header.task_id || "M-01",
+      provider: metadata.provider || header.provider || ""
     },
     stimulus: {
-      title: teacherPack.content?.stimulus?.title || c.stimulus?.title || "",
-      text: teacherPack.content?.stimulus?.text || c.stimulus?.text || ""
+      title: stimulusTitle,
+      text: stimulusText
     },
-    instructions: studentHandout.instructions || c.instructions || "",
+    instructions: studentHandout.instructions || content.instructions || "",
     questions,
     answers
   };

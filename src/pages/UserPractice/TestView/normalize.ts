@@ -140,68 +140,90 @@ function parseAnswers(answerKey: Record<string, any>): Record<string, string> {
 export default function normalize(res: any): NormalizedContent | null {
   if (!res) return null;
 
-  const c = resolvePayload(res);
+  const data = res.data || res;
+  const content = data.content || data;
+  const studentHandout = content.student_handout || content;
+  const teacherPack = content.teacher_pack || content;
+  const metadata = content.metadata || content.header || data.header || {};
+  const header = content.header || data.header || metadata || {};
 
-  if (!c) {
+  if (!content || (!content.instructions && !content.questions && !studentHandout.questions)) {
     console.warn("normalize: unrecognisable payload shape", res);
     return null;
   }
 
-  const studentHandout = c.student_handout || c;
-  const teacherPack = c.teacher_pack || c;
-  const header = c.header || res.header || {};
+  const rawQuestions: any[] = studentHandout.questions || content.questions || [];
+  const questions = rawQuestions.map((q: any, idx: number) => {
+    // Normalize Options from Record<string, string> to {id, text}[]
+    let normalizedOptions = [];
+    if (Array.isArray(q.options)) {
+      normalizedOptions = q.options.map((opt: any, optIdx: number) => {
+        if (typeof opt === 'string') return { id: String.fromCharCode(65 + optIdx), text: opt };
+        return { id: opt.id || opt.key || String.fromCharCode(65 + optIdx), text: opt.text || opt.label || "" };
+      });
+    } else if (typeof q.options === 'object') {
+      normalizedOptions = Object.entries(q.options).map(([key, val]: [string, any]) => ({
+        id: key,
+        text: val
+      }));
+    }
 
-  const rawQuestions: any[] = studentHandout.questions || c.questions || [];
-  const questions = rawQuestions.map((q: any) => ({
-    id: String(q.id ?? ""),
-    text: q.text ?? "",
-    type: (q.type || "").toUpperCase(),
-    options: q.options || [],
-  }));
+    return {
+      id: String(q.id || q.number || idx + 1),
+      text: q.prompt || q.text || q.question || "",
+      type: (q.type || "MCQ").toUpperCase(),
+      options: normalizedOptions,
+    };
+  });
 
-  const answerKey: Record<string, any> = teacherPack?.key?.answer_key || {};
+  const answerKey: Record<string, any> = teacherPack?.answer_key || teacherPack?.key?.answer_key || {};
   const answers = parseAnswers(answerKey);
-  const kind = detectKind(header, questions, c, teacherPack);
+  const kind = detectKind(header, questions, content, teacherPack);
 
   const timeMeta = teacherPack?.key?.time_metadata || {};
-  const calibration = c.calibration_metrics || teacherPack?.key?.calibration_metrics || {};
+  const calibration = content.calibration_metrics || teacherPack?.key?.calibration_metrics || {};
+
+  // Normalize Stimulus
+  const stimulusRaw = studentHandout.stimulus || content.stimulus || "";
+  const stimulusText = typeof stimulusRaw === 'string' ? stimulusRaw : stimulusRaw.text || "";
+  const stimulusTitle = typeof stimulusRaw === 'object' ? stimulusRaw.title : "";
+  const wordCount = Number(teacherPack.word_count || teacherPack.content?.word_count || content.word_count || 0);
 
   const stimulus = {
-    title: teacherPack?.content?.stimulus?.title || c.stimulus?.title || "",
-    text: teacherPack?.content?.stimulus?.text || c.stimulus?.text || "",
-    wordCount: Number(teacherPack?.content?.word_count || c.word_count || 0),
+    title: stimulusTitle,
+    text: stimulusText,
+    wordCount: wordCount || stimulusText.split(' ').length,
   };
 
   const imageUrl =
     header.image_url ||
     teacherPack?.content?.stimulus?.image_url ||
-    c.image_url ||
+    content.image_url ||
     null;
 
   return {
     kind,
     header: {
-      level: header.level || "",
-      skill: header.skill || "",
-      topic: header.topic || "",
-      domain: header.domain || "",
-      taskId: header.task_id || "",
-      // Fix: Safely access layout using optional chaining and local calibration variable
-      layout: calibration.task_type || res?.data?.content?.calibration_metrics?.task_type || "",
-      provider: header.provider || "",
-      lessonTitle: header.lesson_title || "",
-      difficulty: header.difficulty || "",
-      taskTime: Number(header.task_time || 0),
+      level: metadata.level || header.level || "",
+      skill: metadata.skill || header.skill || "",
+      topic: metadata.topic || header.topic || "",
+      domain: metadata.domain || header.domain || "",
+      taskId: metadata.task_id || header.task_id || "",
+      layout: metadata.task_type || calibration.task_type || "",
+      provider: metadata.provider || header.provider || "",
+      lessonTitle: header.lesson_title || metadata.lesson_title || "",
+      difficulty: metadata.difficulty || header.difficulty || "",
+      taskTime: Number(metadata.timer || header.task_time || 0),
     },
     stimulus,
     imageUrl,
-    instructions: studentHandout.instructions || c.instructions || "",
+    instructions: studentHandout.instructions || content.instructions || "",
     questions,
     answers,
     metadata: {
-      isTimed: ["true", "yes"].includes(String(timeMeta.is_timed || "").toLowerCase()),
-      taskTime: Number(timeMeta.task_time || 0),
-      totalPossible: Number(calibration.total_possible || 1),
+      isTimed: !!(metadata.timer || timeMeta.is_timed),
+      taskTime: Number(metadata.timer || timeMeta.task_time || 0),
+      totalPossible: Number(calibration.total_possible || questions.length),
     },
   };
 }
