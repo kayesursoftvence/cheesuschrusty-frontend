@@ -15,7 +15,7 @@ const logoutAction = () => ({ type: "auth/loggedOut" });
 
 
 const rawBaseQuery = fetchBaseQuery({
-  baseUrl: baseURL,
+  baseUrl: `${baseURL}/api/v1`,
   credentials: "include",
   prepareHeaders: (headers) => {
     const accessToken = Cookies.get("accessToken"); // FIXED

@@ -19,11 +19,11 @@ import {
  * Map internal task types to API SKILL values
  */
 const SKILL_MAP: Record<NonNullable<TaskType>, string> = {
-  listening: 'LISTENING',
-  reading: 'READING',
-  writing: 'WRITING',
-  speaking: 'SPEAKING',
-  grammar: 'GRAMMAR',
+  listening: 'Listening',
+  reading: 'Reading',
+  writing: 'Writing',
+  speaking: 'Speaking',
+  grammar: 'Grammar',
 };
 
 /**
@@ -81,22 +81,22 @@ const SECTION_TOTAL_MAP: Partial<Record<NonNullable<TaskIdType>, number>> = {
  * Map difficulty levels to API format
  */
 const DIFFICULTY_MAP: Record<DifficultyLevel, string> = {
-  easy: 'EASY',
-  medium: 'MEDIUM',
-  hard: 'HARD',
+  easy: 'Easy',
+  medium: 'Medium',
+  hard: 'Hard',
 };
 
 /**
  * Map domain values to API format
  */
 const DOMAIN_MAP: Record<Domain, string> = {
-  random: 'RANDOM',
-  health: 'HEALTH',
-  education: 'EDUCATION',
-  work: 'WORK',
-  housing: 'HOUSING',
-  bureaucracy: 'BUREAUCRACY',
-  commerce: 'COMMERCE',
+  random: 'Random',
+  health: 'Health',
+  education: 'Education',
+  work: 'Work',
+  housing: 'Housing',
+  bureaucracy: 'Bureaucracy',
+  commerce: 'Commerce',
 };
 
 /**
