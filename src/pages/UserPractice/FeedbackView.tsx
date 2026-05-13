@@ -6,7 +6,7 @@ import { RootState } from '@/store/store';
 import { setSimulatedFeedbackTier } from '@/store/Slices/PracticeSlice/PracticeSlice';
 import { Tier } from './types';
 import { FaArrowRight, FaBookReader, FaBullseye, FaChartLine, FaCheck, FaInfo, FaLock,
-  //  FaMapSigns,
+    FaMapSigns,
     FaRandom, FaStar, FaTimes } from 'react-icons/fa';
 import type { JSX } from 'react';
 import { ListCheck, Loader2 } from 'lucide-react';
@@ -23,27 +23,27 @@ import { useCompleteLessonMutation } from '@/redux/features/lesson/lessonPractic
 import { useGetMySubscriptionQuery } from '@/redux/features/subscriptions/subscriptionsApi';
 
 
-// interface FeedbackQuestion {
-//   id: string | number;
-//   text?: string;
-//   correct_answer?: string;
-//   explanation?: string;
-// }
+interface FeedbackQuestion {
+  id: string | number;
+  text?: string;
+  correct_answer?: string;
+  explanation?: string;
+}
 
-// interface AnswerReviewItem {
-//   id: number;
-//   question: string;
-//   userAnswer: string;
-//   correctAnswer: string;
-//   isCorrect: boolean;
-//   explanation: string;
-// }
+interface AnswerReviewItem {
+  id: number;
+  question: string;
+  userAnswer: string;
+  correctAnswer: string;
+  isCorrect: boolean;
+  explanation: string;
+}
 
-// interface AnswerMapItem {
-//   id: number;
-//   type: 'correct' | 'incorrect' | 'missed';
-//   icon: string;
-// }
+interface AnswerMapItem {
+  id: number;
+  type: 'correct' | 'incorrect' | 'missed';
+  icon: string;
+}
 
 interface ImprovementPoint {
   critique?: string;
@@ -137,8 +137,14 @@ export default function Feedback(): JSX.Element {
 
       // Construct payload strictly based on skill
       const payload: Record<string, unknown> = {
-        ...content,
-        student_answers: { ...studentAnswers }
+        metadata: content.metadata,
+        student_handout: content.student_handout,
+        teacher_pack: content.teacher_pack,
+        student_response: {
+          answers: Object.keys(studentAnswers)
+            .sort((a, b) => Number(a) - Number(b))
+            .map(key => studentAnswers[key])
+        }
       };
 
       // Only add writing_text for writing tasks
@@ -157,9 +163,17 @@ export default function Feedback(): JSX.Element {
   // Auto-complete lesson when evaluation results are ready
   useEffect(() => {
     if (evaluationResult && !lessonMarkedComplete && lessonId) {
-      const scoring = evaluationResult?.feedback?.scoring;
-      const xp = evaluationResult?.feedback?.xp;
-      const rawAccuracy = scoring?.final_score;
+      // Handle both new and legacy formats
+      const scoring = evaluationResult?.score || evaluationResult?.feedback?.scoring;
+      const xp = evaluationResult?.xp || evaluationResult?.feedback?.xp;
+      
+      let rawAccuracy = 0;
+      if (evaluationResult?.score) {
+          rawAccuracy = (evaluationResult.score.earned / evaluationResult.score.possible) * 100;
+      } else {
+          rawAccuracy = scoring?.final_score || 0;
+      }
+
       const accuracy = Math.max(Number(rawAccuracy) || 0, 0.01);
       const xpEarned = Number(xp?.total_xp) > 0 ? Number(xp.total_xp) : 1;
       const durationSeconds = parseInt(timeSpent, 10) || 0;
@@ -182,8 +196,12 @@ export default function Feedback(): JSX.Element {
   console.log('Evaluation Result:', evaluationResult);
   console.log('Normalized Data:', normalizedData);
 
-  console.log(evaluationResult)
-  const finalScore = evaluationResult?.feedback?.scoring?.final_score
+  const finalScore = useMemo(() => {
+    if (evaluationResult?.score) {
+      return Math.round((evaluationResult.score.earned / evaluationResult.score.possible) * 100);
+    }
+    return evaluationResult?.feedback?.scoring?.final_score || 0;
+  }, [evaluationResult]);
 
   const totalQuestions = useMemo(() => {
     const scoreVal = normalizedData?.score?.value || "";
@@ -205,43 +223,60 @@ export default function Feedback(): JSX.Element {
   const isFree = isActuallyPro ? false : simulatedTier === 'Free';
   const total = totalQuestions || 10;
 
-  // const answerReviewData = useMemo(() => {
-  //   if (!questionSetData?.data?.content?.questions) return [];
+  const answerReviewData = useMemo((): AnswerReviewItem[] => {
+    // Priority: New format diagnostics
+    if (evaluationResult?.diagnostics?.objective_items) {
+      const questions = questionSetData?.data?.content?.student_handout?.questions || [];
+      
+      return evaluationResult.diagnostics.objective_items.map((item: any) => {
+          // Try to find original question text
+          const originalQ = Array.isArray(questions) ? questions.find((q: any) => q.number === item.id || q.id === item.id) : null;
+          
+          return {
+              id: item.id,
+              question: originalQ?.prompt || originalQ?.text || `Question ${item.id}`,
+              userAnswer: item.student_answer,
+              correctAnswer: item.correct_answer,
+              isCorrect: item.earned > 0,
+              explanation: ""
+          };
+      });
+    }
 
-  //   return questionSetData.data.content.questions.map((q: FeedbackQuestion, index: number) => {
-  //     // Find user answer by ID or sequence
-  //     const userAnswer = studentAnswers[String(q.id)] || studentAnswers[index + 1] || "";
-  //     const correctAnswer = q.correct_answer || "";
+    // Fallback: Legacy logic
+    if (!questionSetData?.data?.content?.student_handout?.questions) return [];
 
-  //     // Basic correctness check (can be improved for different layouts)
-  //     const isCorrect = String(userAnswer).trim().toLowerCase() === String(correctAnswer).trim().toLowerCase();
+    return (questionSetData.data.content.student_handout.questions as FeedbackQuestion[]).map((q, index) => {
+      const userAnswer = studentAnswers[String(q.id)] || studentAnswers[index + 1] || "";
+      const correctAnswer = q.correct_answer || "";
+      const isCorrect = String(userAnswer).trim().toLowerCase() === String(correctAnswer).trim().toLowerCase();
 
-  //     return {
-  //       id: index + 1,
-  //       question: q.text || "Question " + (index + 1),
-  //       userAnswer,
-  //       correctAnswer,
-  //       isCorrect,
-  //       explanation: q.explanation || ""
-  //     };
-  //   });
-  // }, [questionSetData, studentAnswers]);
+      return {
+        id: index + 1,
+        question: q.text || "Question " + (index + 1),
+        userAnswer,
+        correctAnswer,
+        isCorrect,
+        explanation: q.explanation || ""
+      };
+    });
+  }, [evaluationResult, questionSetData, studentAnswers]);
 
-  // const answerMap = useMemo((): AnswerMapItem[] => {
-  //   if (answerReviewData.length > 0) {
-  //     return answerReviewData.map((item: AnswerReviewItem): AnswerMapItem => ({
-  //       id: item.id,
-  //       type: (item.isCorrect ? 'correct' : 'incorrect') as 'correct' | 'incorrect',
-  //       icon: item.isCorrect ? '✅' : '❌'
-  //     }));
-  //   }
+  const answerMap = useMemo((): AnswerMapItem[] => {
+    if (answerReviewData.length > 0) {
+      return answerReviewData.map((item): AnswerMapItem => ({
+        id: item.id,
+        type: (item.isCorrect ? 'correct' : 'incorrect') as 'correct' | 'incorrect',
+        icon: item.isCorrect ? '✅' : '❌'
+      }));
+    }
 
-  //   const cells: AnswerMapItem[] = [];
-  //   for (let i = 1; i <= total; i++) {
-  //     cells.push({ id: i, type: 'correct', icon: '✅' });
-  //   }
-  //   return cells;
-  // }, [answerReviewData, total]);
+    const cells: AnswerMapItem[] = [];
+    for (let i = 1; i <= total; i++) {
+      cells.push({ id: i, type: 'correct', icon: '✅' });
+    }
+    return cells;
+  }, [answerReviewData, total]);
 
   if (isLoading) {
     return (
@@ -335,6 +370,17 @@ export default function Feedback(): JSX.Element {
                 <span>Target</span>
               </div>
 
+              {normalizedData?.motivational_close?.message && (
+                <div className="bg-slate-900/40 border border-slate-800 rounded-xl p-6 text-left max-w-2xl mx-auto mb-8">
+                  <div className="text-xs text-blue-400 font-bold uppercase tracking-widest mb-2 flex items-center gap-2">
+                    <FaStar size={12} /> Coach Summary
+                  </div>
+                  <p className="text-slate-300 leading-relaxed italic">
+                    "{typeof normalizedData.motivational_close.message === 'string' ? normalizedData.motivational_close.message : normalizedData.motivational_close.message.target_language}"
+                  </p>
+                </div>
+              )}
+
               <div className="bg-bg-main/60 border border-white/10 rounded-xl p-6 text-center flex flex-col items-center justify-center py-4 mt-8">
                 <div className="text-xs text-slate-400 font-bold uppercase tracking-widest mb-3 w-full">Your CEFR Profile Today</div>
                 <div className="flex flex-wrap items-center justify-center gap-6 text-slate-300 font-mono text-base w-full">
@@ -346,8 +392,8 @@ export default function Feedback(): JSX.Element {
                 </div>
               </div>
 
-              {/* {skill.toLowerCase() !== 'writing' && skill.toLowerCase() !== 'speaking' && (
-                <div className="mb-6 bg-slate-900 border border-slate-800 p-6 rounded-xl shadow-inner mt-8">
+              {skill.toLowerCase() !== 'writing' && skill.toLowerCase() !== 'speaking' && (
+                <div className="mb-6 bg-slate-900 border border-slate-800 p-6 rounded-xl shadow-inner mt-8 text-left">
                   <div className="flex flex-col md:flex-row justify-between md:items-center mb-6 gap-4">
                     <h4 className="font-bold text-white text-lg flex items-center">
                       <FaMapSigns className='text-blue-400 mr-2' /> Your Answer Map</h4>
@@ -366,7 +412,7 @@ export default function Feedback(): JSX.Element {
                     ))}
                   </div>
                 </div>
-              )} */}
+              )}
 
               <button onClick={onExit} className="flex items-center mx-auto bg-slate-700 hover:bg-slate-600 text-white font-bold py-3 px-8 rounded-xl transition shadow-lg text-base mt-8">Return to Practice
                 <FaArrowRight className='ml-2' />
@@ -390,24 +436,32 @@ export default function Feedback(): JSX.Element {
                     {normalizedData?.improvements?.title || "Complete Item Analysis"}
                   </h4>
                   <ul className="space-y-4 text-base text-slate-300">
-                    {evaluationResult?.feedback?.improvements?.map((point: ImprovementPoint, i: number) => (
+                    {normalizedData?.improvements?.points?.map((point: any, i: number) => (
                       <li key={i} className="grid gap-4 bg-slate-800/50 p-4 rounded-lg border border-slate-700/50">
-                        {
-                          point.critique && <div className='flex gap-4'>
-                            <FaTimes className='text-red-500 min-w-4 min-h-4 mt-1' size={18} />
-                            <div>{point.critique}</div>
+                        {typeof point === 'string' ? (
+                          <div className='flex gap-4'>
+                            <FaArrowRight className='text-blue-400 min-w-4 min-h-4 mt-1' size={14} />
+                            <div>{point}</div>
                           </div>
-                        }
-                        {
-                          point?.fix && <div className='flex gap-4'>
-                            <FaCheck className='text-green-500 min-w-4 min-h-4 mt-1' size={18} />
-                            <div>{point?.fix}</div>
-                          </div>
-                        }
-
+                        ) : (
+                          <>
+                            {point.critique && (
+                              <div className='flex gap-4'>
+                                <FaTimes className='text-red-500 min-w-4 min-h-4 mt-1' size={18} />
+                                <div>{point.critique}</div>
+                              </div>
+                            )}
+                            {point.fix && (
+                              <div className='flex gap-4'>
+                                <FaCheck className='text-green-500 min-w-4 min-h-4 mt-1' size={18} />
+                                <div>{point.fix}</div>
+                              </div>
+                            )}
+                          </>
+                        )}
                       </li>
                     ))}
-                    {evaluationResult?.feedback?.improvements?.length === 0 && (
+                    {(!normalizedData?.improvements?.points || normalizedData?.improvements?.points?.length === 0) && (
                       <li className="text-slate-500 italic">No specific improvements identified.</li>
                     )}
                   </ul>
@@ -419,13 +473,13 @@ export default function Feedback(): JSX.Element {
                       {evaluationResult?.feedback?.strengths?.title || "What you already do well"}
                     </h4>
                     <ul className="space-y-4 text-base text-slate-300">
-                      {evaluationResult?.feedback?.strengths?.map((point: StrengthPoint, i: number) => (
+                      {normalizedData?.strengths?.points?.map((point: any, i: number) => (
                         <li key={i} className="flex gap-4">
                           <FaCheck className='text-green-500 mt-1 min-w-4 min-h-4' size={18} />
-                          <span>{point.point}</span>
+                          <span>{typeof point === 'string' ? point : point.point}</span>
                         </li>
                       ))}
-                      {evaluationResult?.feedback?.strengths?.length === 0 && (
+                      {(!normalizedData?.strengths?.points || normalizedData?.strengths?.points?.length === 0) && (
                         <li className="text-slate-500 italic">Continue practicing to identify your strengths.</li>
                       )}
                     </ul>
@@ -433,7 +487,7 @@ export default function Feedback(): JSX.Element {
                 </div>
               </div>
 
-              {/* <div className="bg-[#161d2f] p-8 rounded-xl border border-slate-800 shadow-lg mb-12">
+              <div className="bg-[#161d2f] p-8 rounded-xl border border-slate-800 shadow-lg mb-12 text-left">
                 <h4 className="font-bold text-2xl text-white mb-8 border-b border-slate-700 pb-4 flex items-center gap-3">
                   <FaMapSigns className="text-blue-400" /> Detailed Answer Analysis
                 </h4>
@@ -472,7 +526,7 @@ export default function Feedback(): JSX.Element {
                     </div>
                   ))}
                 </div>
-              </div> */}
+              </div>
             </>
           )}
 

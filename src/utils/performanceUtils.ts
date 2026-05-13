@@ -58,8 +58,17 @@ export function normalizePerformanceData(data: any): NormalizedFeedback | null {
     if (!data) return null;
 
     // 1. Identify where the core feedback object is
-    // Case A: data.feedback_card (Flat or with sections)
-    // Case B: data.feedback (Flat)
+    // Case A: New format (metadata, score, result, diagnostics, xp)
+    // Case B: data.feedback_card (Legacy)
+    // Case C: data.feedback (Legacy)
+    
+    // Check for new format indicators
+    const isNewFormat = !!(data?.metadata && data?.result && data?.score);
+
+    if (isNewFormat) {
+        return normalizeNewFormat(data);
+    }
+
     let root = data?.feedback_card || data?.feedback || {};
     
     // If root.content exists (Case: Nested content), drill down
@@ -215,3 +224,60 @@ export function normalizePerformanceData(data: any): NormalizedFeedback | null {
         motivational_close
     };
 }
+
+function normalizeNewFormat(data: any): NormalizedFeedback {
+    const { metadata, score, result, diagnostics, xp } = data;
+
+    const earned = score?.earned || 0;
+    const possible = score?.possible || 1;
+    const scorePercentage = Math.round((earned / possible) * 100);
+
+    return {
+        header: {
+            level: metadata?.level || "N/A",
+            skill: metadata?.skill || "Reading",
+            target_language: metadata?.target_language || "Italian",
+            primary_language: metadata?.feedback_language,
+            task_id: metadata?.task_id,
+            domain: metadata?.domain,
+            topic: metadata?.topic,
+        },
+        score: {
+            title: "Performance Score",
+            value: `${earned} / ${possible}`,
+            status: result?.band || "",
+        },
+        cefr_profile: {
+            title: "CEFR Evaluation",
+            details: {
+                overall: result?.cefr_positioning || "N/A",
+                comprehension: "N/A",
+                accuracy: "N/A",
+                range: "N/A",
+            },
+        },
+        strengths: {
+            title: "Your Strengths",
+            points: result?.strengths || [],
+        },
+        improvements: {
+            title: "Next Steps",
+            points: result?.next_steps || [],
+        },
+        readiness: {
+            title: "Exam Readiness",
+            percentage: `${scorePercentage}%`,
+            message: result?.band || "",
+        },
+        power_tip: result?.power_tip ? {
+            title: "Coach Power Tip",
+            explanation: result.power_tip,
+            example: "",
+        } : null,
+        motivational_close: {
+            title: "Keep Going!",
+            message: result?.summary || "",
+        },
+    };
+}
+
