@@ -109,7 +109,16 @@ export default function QuestionDisplay(): JSX.Element {
             <button 
               // onClick={handleNext} 
               // disabled={!selectedAnswer} 
-              onClick={()=>evaluateReadingPerformance({ ...content, "student_answers": { ...studentAnswers }})}
+              onClick={() => evaluateReadingPerformance({
+                metadata: content.metadata,
+                student_handout: content.student_handout,
+                teacher_pack: content.teacher_pack,
+                student_response: {
+                  answers: Object.keys(studentAnswers)
+                    .sort((a, b) => Number(a) - Number(b))
+                    .map(key => studentAnswers[key])
+                }
+              })}
               className="px-6 py-2 rounded-lg bg-blue-600 text-white disabled:opacity-50 hover:bg-blue-700 transition-colors"
             >
               Submit

@@ -193,8 +193,14 @@ export default function usePerformanceData(): UsePerformanceDataReturn {
     
     if (!ignore && content) {
       const payload = { 
-        ...content, 
-        student_answers: { ...studentAnswers } 
+        metadata: content.metadata,
+        student_handout: content.student_handout,
+        teacher_pack: content.teacher_pack,
+        student_response: {
+          answers: Object.keys(studentAnswers)
+            .sort((a, b) => Number(a) - Number(b))
+            .map(key => studentAnswers[key])
+        }
       };
 
       let promise: any = null;

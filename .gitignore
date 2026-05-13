@@ -30,3 +30,4 @@ temp_interactive_push.bat
 # Environment variables
 .env
 .env.*
+branch_structure.json

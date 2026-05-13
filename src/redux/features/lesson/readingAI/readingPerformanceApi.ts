@@ -2,7 +2,16 @@
 // src/redux/features/reading/readingPerformanceApi.ts
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
-export type PerformanceRequest = any;
+export interface EvaluateReadingRequest {
+  metadata: any;
+  student_handout: any;
+  teacher_pack: any;
+  student_response: {
+    answers: string[];
+  };
+}
+
+export type PerformanceRequest = EvaluateReadingRequest;
 
 export interface PerformanceResponse {
     feedback_card?: PerformanceResponse['feedback'];
