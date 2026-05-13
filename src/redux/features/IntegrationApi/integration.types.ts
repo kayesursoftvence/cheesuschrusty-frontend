@@ -3,17 +3,17 @@
 // ========================
 
 export enum IntegrationProvider {
-  OPENAI = "OPENAI",
-  GROK = "GROK",
-  LEMONSQUEEZY = "LEMONSQUEEZY",
-  CLOUDINARY = "CLOUDINARY",
-  OPENROUTER = "OPENROUTER",
-  MAILJET = "MAILJET",
-  GOOGLE_TRANSLATION = "GOOGLE_TRANSLATION",
-  AZURE_EU = "AZURE_EU",
-  NEON_DB = "NEON_DB",
-  GEMINI = "GEMINI",
-  STRIPE = "STRIPE",
+  OPENAI = "openai",
+  GROK = "grok",
+  LEMONSQUEEZY = "lemonsqueezy",
+  CLOUDINARY = "cloudinary",
+  OPENROUTER = "openrouter",
+  MAILJET = "mailjet",
+  GOOGLE_TRANSLATION = "google_translation",
+  AZURE_EU = "azure_eu",
+  NEON_DB = "neon_db",
+  GEMINI = "gemini",
+  STRIPE = "stripe",
 }
 
 export interface ApiResponse<T> {
